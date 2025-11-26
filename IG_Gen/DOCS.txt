@@ -3,7 +3,7 @@ sudo apt install llvm
 
 
 **Generate LLVM IR file using clang**
-clang  -S -emit-llvm -O0 test.c -o test.ll
+clang -S -emit-llvm -O0 test.c -o test.ll
                   v
-**mem2reg transformation pass**   -> NOTE: CURRENTLY NOT WORKING
+**mem2reg transformation pass**   -> NOTE: MUST REMOVE OPTNONE FROM IR
 opt -passes=mem2reg -S test.ll -o test-mem2reg.ll
