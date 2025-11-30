@@ -409,8 +409,9 @@ void analyze_registers(FILE *fp){
     if (line)
         free(line);
 
-
-
+    /* Core liveness tracking. All this will have to change for multiple funcs */
+    compute_use_def_block(block_map,map_regs);
+    compute_in_out(block_map,map_regs);
 }
 
 int main(int argc, char **argv){
