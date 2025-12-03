@@ -14,7 +14,6 @@
 
 #define TRUE_           1
 #define FALSE_          0
-#define NUM_REGISTERS   64
 #define MAX_USE_DEF     8
 
 typedef u_int64_t BITSIZE;
@@ -81,13 +80,13 @@ static void init_bits(bitReg *regs, int reg_num){
 
 // a - b
 static inline void bit_diff(bitReg *out, bitReg *a, bitReg *b){
-    for (int i = 0; i < out->reglines; ++out){
+    for (int i = 0; i < out->reglines; ++i){
         out->bits[i] = a->bits[i] & ~b->bits[i];
     }
 }
 
 static inline void bit_union_or(bitReg *out, bitReg *a, bitReg *b){
-    for (int i = 0; i < out->reglines; ++out){
+    for (int i = 0; i < out->reglines; ++i){
         out->bits[i] = a->bits[i] | b->bits[i];
     }
 }
@@ -118,15 +117,15 @@ static inline void clear_bits(bitReg *regs){
  * Other methods
  */
 
-void compute_use_def_block(Function &blocks,Register_mapping &regMap){
+void compute_use_def_block(Function &blocks,Register_mapping &regMap, int num_regs){
 
     int reg, i, reg_ID;
 
     for (std::pair<const size_t,Block> &block : blocks){
 
         Block *bl = &block.second;
-        init_bits(&bl->use_block,NUM_REGISTERS);
-        init_bits(&bl->def_block,NUM_REGISTERS);
+        init_bits(&bl->use_block,num_regs);
+        init_bits(&bl->def_block,num_regs);
 
         for (i = 0; i < bl->num_instr; ++i){
             Instruct in = bl->instrcts[i];
@@ -151,7 +150,7 @@ void compute_use_def_block(Function &blocks,Register_mapping &regMap){
 void compute_use_def_instr(const char *line,
                            Block *block,
                            Register_mapping &regMap,
-                           size_t &reg_idx){
+                           int &reg_idx){
 
     size_t instr_idx, *sz_use, *sz_def;
     const char *eq, *rhs, *lhs, *txt_end, *token;
@@ -215,18 +214,14 @@ void compute_use_def_instr(const char *line,
 void compute_successors(const char *line,
                         Block *block,
                         Register_mapping &regMap,
-                        size_t &reg_idx){
+                        int &reg_idx){
 
     const char *txt_end, *p;
     size_t instr_idx;
 
     instr_idx = block->num_instr - 1;
 
-    if (block->num_succ == 0){
-        block->successors = (int*)malloc(sizeof(int));
-        block->num_succ++;
-        block->succ_len++;
-    }
+    block->num_succ = 0;
 
     // First separate out the sub-instructions in the branch line
 
@@ -237,20 +232,9 @@ void compute_successors(const char *line,
     std::cregex_iterator end;
 
     block->successors = (int*)malloc(it->size() * sizeof(int));
+    block->succ_len = it->size();
 
     for (; it != end; ++it){
-
-        if (block->num_succ >= block->succ_len){
-            size_t resize = 2 * block->succ_len;
-
-            block->successors = (int*)realloc(block->successors,resize * sizeof(int));
-            block->succ_len = resize;
-
-            if(block->successors == NULL){
-                fprintf(stderr, "Control flow graph construction failed: Reallocation error\n");
-                exit(EXIT_FAILURE);
-            }
-        }
 
         const std::cmatch &m = *it;
         p = m[0].first;
@@ -260,7 +244,8 @@ void compute_successors(const char *line,
 
         if (p - 6 >= line){
             if (strncmp(p - 6,"label ",6) == 0) {
-                block->successors[block->num_succ - 1] = atoi(p + 1);
+                block->successors[block->num_succ] = atoi(p + 1);
+                block->num_succ++;
             }
         } else {
 
@@ -276,7 +261,7 @@ void compute_successors(const char *line,
 
         }
 
-        block->num_succ++;
+
     }
 }
 
@@ -284,7 +269,7 @@ void compute_successors(const char *line,
 LINE_TYPE set_up_blocks(const char *line, Function &blocks,
                         size_t block_idx,
                         Register_mapping &regMap,
-                        size_t &reg_idx){
+                        int &reg_idx){
 
     Block *block;
 
@@ -332,24 +317,24 @@ LINE_TYPE set_up_blocks(const char *line, Function &blocks,
     return LINE_TYPE::INTERMEDIATE;
 }
 
-void compute_in_out(Function &blocks){
+// https://www.geeksforgeeks.org/compiler-design/liveliness-analysis-in-compiler-design/
+void compute_in_out(Function &blocks, int num_regs){
     int i, in_diff, out_diff;
 
     bitReg in_copy, out_copy, tmp;
 
-    init_bits(&in_copy,NUM_REGISTERS);
-    init_bits(&out_copy,NUM_REGISTERS);
-    init_bits(&tmp,NUM_REGISTERS);
+    init_bits(&in_copy,num_regs);
+    init_bits(&out_copy,num_regs);
+    init_bits(&tmp,num_regs);
 
     for (std::pair<const size_t,Block> &block : blocks){
         Block *bl = &block.second;
 
-        init_bits(&bl->in_block,NUM_REGISTERS);
-        init_bits(&bl->out_block,NUM_REGISTERS);
+        init_bits(&bl->in_block,num_regs);
+        init_bits(&bl->out_block,num_regs);
 
     }
 
-    // https://www.geeksforgeeks.org/compiler-design/liveliness-analysis-in-compiler-design/
     do {
 
         in_diff = out_diff = FALSE_;
@@ -381,24 +366,133 @@ void compute_in_out(Function &blocks){
 
     } while (in_diff || out_diff);
 
+
+    free(tmp.bits);
+    free(in_copy.bits);
+    free(out_copy.bits);
 }
 
-void generate_edge_list(){}
+void free_heap_alloc(Function &blocks){
+    for (std::pair<const size_t,Block> &block : blocks){
 
-void free_heap_alloc(){}
+        Block *bl = &block.second;
+
+        free(bl->instrcts);
+        free(bl->successors);
+        free(bl->use_block.bits);
+        free(bl->def_block.bits);
+        free(bl->in_block.bits);
+        free(bl->out_block.bits);
+
+    }
+}
+
+FILE *create_edgelist_file(char fl_name[]){
+    FILE *fp;
+
+    fp = fopen(fl_name,"w");
+
+    if (!fp){
+        fprintf(stderr,"Could not generate edge list file for %s\n",fl_name);
+        return NULL;
+    }
+
+    return fp;
+}
+
+/*  https://www2.cs.arizona.edu/~collberg/Teaching/553/2011/Handouts/Handout-23.pdf
+
+    FOR all basic blocks b in the program DO
+        live := out[b];
+        FOR all instructions I ∈ b, in reverse order DO
+            FOR all d ∈ def(I) DO
+                FOR all l ∈ live ∪ def(I) DO
+                    add the interference graph edge hl, di;
+            live := use(I) ∪ (live − def(I));
+ */
+
+void generate_edge_list(Function &blocks,
+                        Register_mapping regmap,
+                        int num_regs,
+                        char fl_name[]){
+    FILE *fp;
+    int i, d, r, u, regnum_d, regnum_u;
+    Block *bl;
+    bitReg *out;
+    Instruct I;
+    char* def, *use;
+
+    if(!(fp = create_edgelist_file(fl_name))){
+        return;
+    }
+
+    bitReg Live;
+    init_bits(&Live,num_regs);
+
+    for (std::pair<const size_t,Block> &block : blocks){
+
+        bl = &block.second;
+        out = &bl->out_block;
+
+        for (i = 0; i < out->reglines; ++i)
+            Live.bits[i] = out->bits[i];
+
+        for (i = bl->num_instr - 1; i >= 0; --i){
+            I = bl->instrcts[i];
+
+            for (d = 0; d < I.size_def; ++d){
+
+                def = I.def[d];
+                regnum_d = regmap[def];
+
+                for (r = 0; r < num_regs; ++r){
+                    if(bit_is_active(&Live,r) && r != regnum_d){
+                        fprintf(fp, "%d %d\n", r, regnum_d);
+                        fprintf(fp, "%d %d\n", regnum_d, r);
+                    }
+                }
+
+            }
+
+            // live := use(I) ∪ (live − def(I))
+            for (d = 0; d < I.size_def; ++d){
+                def = I.def[d];
+                regnum_d = regmap[def];
+                kill_reg(&Live,regnum_d);
+
+            }
+
+            for (u = 0; u < I.size_use; ++u){
+                use = I.use[u];
+                regnum_u = regmap[use];
+                set_reg_live(&Live,regnum_u);
+            }
+
+        }
+
+    }
+
+    free(Live.bits);
+    fclose(fp);
+}
 
 /*
  * Currently only works with 1 function.
  * TODO: make work with multiple functions. I already have the struct above
  */
-void analyze_registers(FILE *fp){
+void analyze_registers(FILE *fp, char fl_name[]){
 
-    size_t len = 0, funcidx = 0, block_idx = 0, line_idx = 0, reg_idx = 0, i;
+    size_t len = 0, funcidx = 0, block_idx = 0, line_idx = 0, i;
+    int reg_idx = 0;
     char *line = NULL;
     int in_func = FALSE_, in_block = FALSE_;
     LINE_TYPE loc;
     Register_mapping map_regs;
     Function block_map;
+    char gr_nm[PATH_MAX];
+
+    std::regex re("(@[A-Za-z0-9._]+)");
+    std::cmatch match_out;
 
     while (getline(&line, &len, fp) != -1) {
         if (!in_func){
@@ -406,6 +500,20 @@ void analyze_registers(FILE *fp){
                 in_func = TRUE_;
                 block_idx = 0;
                 in_block = TRUE_;
+
+                if (!std::regex_search(line,match_out,re)) {
+                    fprintf(stderr,"Could not compute name of function you entered. How did you get here?\n");
+                    exit(EXIT_FAILURE);
+                }
+
+                // Make file name for edge list
+                snprintf(gr_nm, sizeof(gr_nm),
+                         "%s_%.*s.txt",                        // {file}_{function}.txt
+                         fl_name,
+                         (int)match_out[0].length(),
+                         match_out[0].first);
+
+
             } else { continue; }
         }
 
@@ -422,7 +530,7 @@ void analyze_registers(FILE *fp){
         loc = set_up_blocks(line,block_map,block_idx,map_regs,reg_idx);
         in_block = (loc != LINE_TYPE::BRANCH) ? TRUE_ : FALSE_;
 
-        if (line[0] == '}'){
+        if (line[0] == '}'){        // This is wrong right now and the function never ends TODO: to implement multiple funcs, you fix state machine order first
             funcidx++;
             line_idx = 0;
             in_func = FALSE_;
@@ -434,13 +542,16 @@ void analyze_registers(FILE *fp){
     if (line)
         free(line);
 
-    /* Core liveness tracking. All this will have to change for multiple funcs */
-    compute_use_def_block(block_map,map_regs);
-    compute_in_out(block_map);
 
+    /* Core liveness tracking. All this will have to change for multiple funcs */
+    compute_use_def_block(block_map,map_regs, reg_idx);
+    compute_in_out(block_map, reg_idx);
+
+    /* Here we make the edge list given we have populated all necessary structures */
+    generate_edge_list(block_map, map_regs, reg_idx, gr_nm);
 
     /* Not implemented. This program will brick your computer */
-    free_heap_alloc();
+    free_heap_alloc(block_map);
 }
 
 int main(int argc, char **argv){
@@ -448,6 +559,8 @@ int main(int argc, char **argv){
     char *fl_name;
     FILE *fp;
     char abs_path[PATH_MAX];
+    char graph_file_ttl[PATH_MAX];
+    size_t len_ll, size_noll;
 
     if (argc != 2){
         fprintf(stderr,"Invalid number of arguments\n");
@@ -468,7 +581,11 @@ int main(int argc, char **argv){
         return EXIT_FAILURE;
     }
 
-    analyze_registers(fp);
+    len_ll = 3; // ".ll"
+    size_noll = strlen(fl_name) - len_ll;
+
+    strncpy(graph_file_ttl,fl_name,size_noll);
+    analyze_registers(fp,graph_file_ttl);
 
     return EXIT_SUCCESS;
 }
