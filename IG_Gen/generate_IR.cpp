@@ -179,10 +179,8 @@ void compute_use_def_instr(const char *line,
         const std::cmatch &m = *it;
         token = m[0].first;
 
-        (*sz_def)++;
-        snprintf(block->instrcts[instr_idx].def[*sz_def - 1], m[0].length() + 1,"%.*s",(int)m[0].length(),token);
-
-        std::string map_token(block->instrcts[instr_idx].def[*sz_def - 1],m[0].length());
+        snprintf(block->instrcts[instr_idx].def[*sz_def], m[0].length() + 1,"%.*s",(int)m[0].length(),token);
+        std::string map_token(block->instrcts[instr_idx].def[*sz_def],m[0].length());
 
         if (regMap.find(map_token) == regMap.end()){
             regMap[map_token] = reg_idx;
@@ -190,22 +188,23 @@ void compute_use_def_instr(const char *line,
             reg_idx++;
         }
 
+        (*sz_def)++;
     }
 
     for(std::cregex_iterator it = begin_rhs; it != end; ++it){
         const std::cmatch &m = *it;
         token = m[0].first;
 
-        (*sz_use)++;
-        snprintf(block->instrcts[instr_idx].use[*sz_use - 1], m[0].length() + 1,"%.*s",(int)m[0].length(),token);
-
-        std::string map_token(block->instrcts[instr_idx].use[*sz_use - 1],m[0].length());
+        snprintf(block->instrcts[instr_idx].use[*sz_use], m[0].length() + 1,"%.*s",(int)m[0].length(),token);
+        std::string map_token(block->instrcts[instr_idx].use[*sz_use],m[0].length());
 
         if (regMap.find(map_token) == regMap.end()){
             regMap[map_token] = reg_idx;
 
             reg_idx++;
         }
+
+        (*sz_use)++;
     }
 
     block->num_instr++;
@@ -448,7 +447,6 @@ void generate_edge_list(Function &blocks,
                 for (r = 0; r < num_regs; ++r){
                     if(bit_is_active(&Live,r) && r != regnum_d){
                         fprintf(fp, "%d %d\n", r, regnum_d);
-                        fprintf(fp, "%d %d\n", regnum_d, r);
                     }
                 }
 
