@@ -332,7 +332,7 @@ LINE_TYPE set_up_blocks(const char *line, Function &blocks,
     return LINE_TYPE::INTERMEDIATE;
 }
 
-void compute_in_out(Function &blocks, Register_mapping &regMap){
+void compute_in_out(Function &blocks){
     int i, in_diff, out_diff;
 
     bitReg in_copy, out_copy, tmp;
@@ -347,9 +347,9 @@ void compute_in_out(Function &blocks, Register_mapping &regMap){
         init_bits(&bl->in_block,NUM_REGISTERS);
         init_bits(&bl->out_block,NUM_REGISTERS);
 
-
     }
 
+    // https://www.geeksforgeeks.org/compiler-design/liveliness-analysis-in-compiler-design/
     do {
 
         in_diff = out_diff = FALSE_;
@@ -360,22 +360,32 @@ void compute_in_out(Function &blocks, Register_mapping &regMap){
             bitReg *in = &bl->in_block;
             bitReg *out = &bl->out_block;
 
+            for (i = 0; i < bl->num_succ; ++i){
+                size_t s = bl->successors[i];
+
+                bit_union_or(&out_copy,&out_copy,&blocks[s].in_block);
+            }
+
+            bit_diff(&tmp,&out_copy,&bl->def_block);
+            bit_union_or(&in_copy,&bl->use_block,&tmp);
+
             in_diff = memcmp(in->bits,in_copy.bits,in->reglines * sizeof(BITSIZE)) != FALSE_;
             out_diff = memcmp(out->bits,out_copy.bits,out->reglines * sizeof(BITSIZE)) != FALSE_;
 
             if (in_diff || out_diff){
-
+                memcpy(in->bits,in_copy.bits,in_copy.reglines * sizeof(BITSIZE));
+                memcpy(out->bits,out_copy.bits,out_copy.reglines * sizeof(BITSIZE));
             }
         }
-
-
 
 
     } while (in_diff || out_diff);
 
 }
 
-void delete_registers(){}
+void generate_edge_list(){}
+
+void free_heap_alloc(){}
 
 /*
  * Currently only works with 1 function.
@@ -426,11 +436,11 @@ void analyze_registers(FILE *fp){
 
     /* Core liveness tracking. All this will have to change for multiple funcs */
     compute_use_def_block(block_map,map_regs);
-    compute_in_out(block_map,map_regs);
+    compute_in_out(block_map);
 
 
     /* Not implemented. This program will brick your computer */
-    delete_registers();
+    free_heap_alloc();
 }
 
 int main(int argc, char **argv){
