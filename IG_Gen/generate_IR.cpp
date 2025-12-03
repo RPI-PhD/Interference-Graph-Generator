@@ -4,6 +4,9 @@
 #include <unordered_set>
 #include <unordered_map>
 #include <regex>
+#include <iostream>
+#include <climits>
+#include <unistd.h>
 
 /*
  * Useful structs containing node info to later construct edges
@@ -51,8 +54,10 @@ typedef struct {
 
 } Block;  // TODO: This became really big and should probably be broken into multiple structs (bitstruct, successor struct, etc)
 
+/* We need this if we want to use char* */
+
 typedef std::unordered_map<size_t, Block> Function;
-typedef std::unordered_map<const char *, int> Register_mapping;
+typedef std::unordered_map<std::string, int> Register_mapping;
 
 typedef struct {
     size_t size;
@@ -148,15 +153,20 @@ void compute_use_def_instr(const char *line,
                            Register_mapping &regMap,
                            size_t &reg_idx){
 
-    size_t instr_idx;
+    size_t instr_idx, *sz_use, *sz_def;
     const char *eq, *rhs, *lhs, *txt_end, *token;
 
-    instr_idx = block->num_instr - 1;
+    instr_idx = block->num_instr;
+
+    sz_def = &block->instrcts[instr_idx].size_def;
+    sz_use = &block->instrcts[instr_idx].size_use;
+
+    *sz_def = 0, *sz_use = 0;
 
     eq = strchr(line, '=');
 
     rhs = eq == NULL ? line : eq + 1;
-    lhs = eq == NULL ? NULL : eq - 1;
+    lhs = eq == NULL ? line : eq - 1;
 
     std::regex re("(%[A-Za-z0-9._]+)");
     txt_end = rhs + strlen(rhs);
@@ -170,15 +180,16 @@ void compute_use_def_instr(const char *line,
         const std::cmatch &m = *it;
         token = m[0].first;
 
-        block->instrcts[instr_idx].size_def++;
-        size_t sz = block->instrcts[instr_idx].size_def;
+        (*sz_def)++;
+        snprintf(block->instrcts[instr_idx].def[*sz_def - 1], m[0].length() + 1,"%.*s",(int)m[0].length(),token);
 
-        if (regMap.find(token) == regMap.end()){
-            regMap[token] = reg_idx;
+        std::string map_token(block->instrcts[instr_idx].def[*sz_def - 1],m[0].length());
+
+        if (regMap.find(map_token) == regMap.end()){
+            regMap[map_token] = reg_idx;
 
             reg_idx++;
         }
-        strcpy(block->instrcts[instr_idx].def[sz - 1],token);
 
     }
 
@@ -186,15 +197,16 @@ void compute_use_def_instr(const char *line,
         const std::cmatch &m = *it;
         token = m[0].first;
 
-        block->instrcts[instr_idx].size_use++;
-        size_t sz = block->instrcts[instr_idx].size_use;
+        (*sz_use)++;
+        snprintf(block->instrcts[instr_idx].use[*sz_use - 1], m[0].length() + 1,"%.*s",(int)m[0].length(),token);
 
-        if (regMap.find(token) == regMap.end()){
-            regMap[token] = reg_idx;
+        std::string map_token(block->instrcts[instr_idx].use[*sz_use - 1],m[0].length());
+
+        if (regMap.find(map_token) == regMap.end()){
+            regMap[map_token] = reg_idx;
 
             reg_idx++;
         }
-        strcpy(block->instrcts[instr_idx].use[sz - 1],token);
     }
 
     block->num_instr++;
@@ -247,7 +259,7 @@ void compute_successors(const char *line,
          * so walk back 6 steps and check for "label " */
 
         if (p - 6 >= line){
-            if (strncmp(p - 6,"label ",6) != 0) {
+            if (strncmp(p - 6,"label ",6) == 0) {
                 block->successors[block->num_succ - 1] = atoi(p + 1);
             }
         } else {
@@ -289,7 +301,7 @@ LINE_TYPE set_up_blocks(const char *line, Function &blocks,
 
         if (block->instr_len == 0){
             block->instrcts = (Instruct*) calloc(1, sizeof(Instruct));
-            block->num_instr = 1;
+            block->num_instr = 0;
             block->instr_len = 1;
         } else {
             size_t resize_i = 2 * block->instr_len;
@@ -303,17 +315,18 @@ LINE_TYPE set_up_blocks(const char *line, Function &blocks,
         }
     }
 
-    // Per-instruction use/def populating
-    compute_use_def_instr(line,block,regMap,reg_idx);
-
     /*
      * If we see a branch at the end of a block, we need to store the successors
      *
      * Went with a hash table instead of tree just cuz (would've done tree if still in C)
      */
-    if (strncmp(line,"br",2) != 0){
+    if (strncmp(line,"  br", 4) == 0){
         compute_successors(line,block,regMap,reg_idx);
         return LINE_TYPE::BRANCH;
+    } else {
+
+        // Per-instruction use/def populating
+        compute_use_def_instr(line,block,regMap,reg_idx);
     }
 
     return LINE_TYPE::INTERMEDIATE;
@@ -379,7 +392,7 @@ void analyze_registers(FILE *fp){
 
     while (getline(&line, &len, fp) != -1) {
         if (!in_func){
-            if (strncmp(line,"define",6) != 0) {
+            if (strncmp(line,"define",6) == 0) {
                 in_func = TRUE_;
                 block_idx = 0;
                 in_block = TRUE_;
@@ -390,12 +403,14 @@ void analyze_registers(FILE *fp){
             if (strchr(line, ':') != NULL){
                 in_block = TRUE_;
                 block_idx = atoi(line);
-            } else { continue; }
+            }
+
+            continue;
         }
 
         /* Interesting stuff in here */
         loc = set_up_blocks(line,block_map,block_idx,map_regs,reg_idx);
-        in_block = (loc == LINE_TYPE::BRANCH) ? TRUE_ : FALSE_;
+        in_block = (loc != LINE_TYPE::BRANCH) ? TRUE_ : FALSE_;
 
         if (line[0] == '}'){
             funcidx++;
@@ -412,12 +427,17 @@ void analyze_registers(FILE *fp){
     /* Core liveness tracking. All this will have to change for multiple funcs */
     compute_use_def_block(block_map,map_regs);
     compute_in_out(block_map,map_regs);
+
+
+    /* Not implemented. This program will brick your computer */
+    delete_registers();
 }
 
 int main(int argc, char **argv){
 
     char *fl_name;
     FILE *fp;
+    char abs_path[PATH_MAX];
 
     if (argc != 2){
         fprintf(stderr,"Invalid number of arguments\n");
@@ -425,12 +445,20 @@ int main(int argc, char **argv){
     }
 
     fl_name = argv[1];
-    fp = fopen(fl_name,"r");
+
+    if (realpath(fl_name, abs_path) == NULL){
+        fprintf(stderr,"Unable to get cwd\n");
+        return EXIT_FAILURE;
+    }
+
+    fp = fopen(abs_path,"r");
 
     if (fp == NULL){
         fprintf(stderr,"Could not open file %s\n",fl_name);
         return EXIT_FAILURE;
     }
+
+    analyze_registers(fp);
 
     return EXIT_SUCCESS;
 }
