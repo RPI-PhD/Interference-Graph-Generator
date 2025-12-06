@@ -91,6 +91,12 @@ static inline void bit_union_or(bitReg *out, bitReg *a, bitReg *b){
     }
 }
 
+static inline void bit_intersection_and(bitReg *out, bitReg *a, bitReg *b){
+    for (int i = 0; i < out->reglines; ++i){
+        out->bits[i] = a->bits[i] & b->bits[i];
+    }
+}
+
 // set register bit to 1
 static inline void set_reg_live(bitReg *regs, int regnum){
     int sz = sizeof(BITSIZE) << 3;
@@ -478,16 +484,20 @@ void generate_edge_list(Function &blocks,
  * Currently only works with 1 function.
  * TODO: make work with multiple functions. I already have the struct above
  */
-void analyze_registers(FILE *fp, char fl_name[]){
+void analyze_registers(FILE *fp, char fl_name[], int full_file){
 
     size_t len = 0, funcidx = 0, block_idx = 0, line_idx = 0, i;
     int reg_idx = 0;
     char *line = NULL;
     int in_func = FALSE_, in_block = FALSE_;
     LINE_TYPE loc;
-    Register_mapping map_regs;
-    Function block_map;
     char gr_nm[PATH_MAX];
+
+    std::vector<Function> block_map;
+    block_map.emplace_back();
+
+    std::vector<Register_mapping> reg_map;
+    reg_map.emplace_back();
 
     std::regex re("(@[A-Za-z0-9._]+)");
     std::cmatch match_out;
@@ -525,14 +535,26 @@ void analyze_registers(FILE *fp, char fl_name[]){
         }
 
         /* Interesting stuff in here */
-        loc = set_up_blocks(line,block_map,block_idx,map_regs,reg_idx);
+        loc = set_up_blocks(line,block_map[funcidx],block_idx,reg_map[funcidx],reg_idx);
         in_block = (loc != LINE_TYPE::BRANCH) ? TRUE_ : FALSE_;
 
         if (line[0] == '}'){        // This is wrong right now and the function never ends TODO: to implement multiple funcs, you fix state machine order first
-            funcidx++;
             line_idx = 0;
             in_func = FALSE_;
             in_block = FALSE_;
+
+            /* Core liveness tracking. All this will have to change for multiple funcs */
+            compute_use_def_block(block_map[funcidx],reg_map[funcidx], reg_idx);
+            compute_in_out(block_map[funcidx], reg_idx);
+
+            /* Here we make the edge list given we have populated all necessary structures */
+            generate_edge_list(block_map[funcidx], reg_map[funcidx], reg_idx, gr_nm);
+
+            funcidx++;
+            block_map.emplace_back();
+            reg_map.emplace_back();
+
+
         } else { line_idx++; }
     }
 
@@ -541,15 +563,10 @@ void analyze_registers(FILE *fp, char fl_name[]){
         free(line);
 
 
-    /* Core liveness tracking. All this will have to change for multiple funcs */
-    compute_use_def_block(block_map,map_regs, reg_idx);
-    compute_in_out(block_map, reg_idx);
 
-    /* Here we make the edge list given we have populated all necessary structures */
-    generate_edge_list(block_map, map_regs, reg_idx, gr_nm);
 
     /* Not implemented. This program will brick your computer */
-    free_heap_alloc(block_map);
+    //free_heap_alloc(block_map);
 }
 
 int main(int argc, char **argv){
@@ -579,11 +596,21 @@ int main(int argc, char **argv){
         return EXIT_FAILURE;
     }
 
-    len_ll = 3; // ".ll"
-    size_noll = strlen(fl_name) - len_ll;
+    char * last = strrchr(fl_name,'/');
+    *last = 'a';
+    char * second_last = strrchr(fl_name,'/');
+    *last = '/';
+    int pathname_len = second_last - fl_name;
 
-    strncpy(graph_file_ttl,fl_name,size_noll);
-    analyze_registers(fp,graph_file_ttl);
+    len_ll = 3; // ".ll"
+    size_noll = strlen(last) - len_ll - 1;
+
+
+    strncpy(graph_file_ttl,fl_name,pathname_len);
+    graph_file_ttl[pathname_len] = '\0';
+    strcat(graph_file_ttl,"/output_graph/");
+    strncat(graph_file_ttl,last+1,size_noll);
+    analyze_registers(fp,graph_file_ttl ,0);
 
     return EXIT_SUCCESS;
 }

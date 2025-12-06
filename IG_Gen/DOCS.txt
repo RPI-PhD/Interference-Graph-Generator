@@ -6,4 +6,4 @@ sudo apt install llvm
 clang -S -emit-llvm -O0 test.c -o test.ll
                   v
 **mem2reg transformation pass**   -> NOTE: MUST REMOVE OPTNONE FROM IR
-opt -passes=mem2reg -S test.ll -o test-mem2reg.ll
+opt -passes=mem2reg -S -O0 test.ll -o test-mem2reg.ll
