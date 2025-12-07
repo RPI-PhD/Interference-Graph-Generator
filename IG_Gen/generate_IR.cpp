@@ -7,14 +7,17 @@
 #include <iostream>
 #include <climits>
 #include <unistd.h>
+#include <sys/stat.h>
+
 
 /*
  * Useful structs containing node info to later construct edges
  */
 
-#define TRUE_           1
-#define FALSE_          0
-#define MAX_USE_DEF     8
+#define TRUE_                   1
+#define FALSE_                  0
+#define MAX_USE_DEF             8
+#define BYTES_PER_FUNCTION      50
 
 typedef u_int64_t BITSIZE;
 
@@ -59,8 +62,11 @@ typedef std::unordered_map<size_t, Block> Function;
 typedef std::unordered_map<std::string, int> Register_mapping;
 
 typedef struct {
-    size_t size;
+    size_t func_size;
+
     Function *funcs;
+    Register_mapping *regs;
+
 } IRFuncs;
 
 typedef enum {
@@ -484,20 +490,22 @@ void generate_edge_list(Function &blocks,
  * Currently only works with 1 function.
  * TODO: make work with multiple functions. I already have the struct above
  */
-void analyze_registers(FILE *fp, char fl_name[], int full_file){
+void analyze_registers(FILE *fp, char fl_name[], int file_size){
 
-    size_t len = 0, funcidx = 0, block_idx = 0, line_idx = 0, i;
+    size_t len = 0, block_idx = 0, line_idx = 0, i;
     int reg_idx = 0;
     char *line = NULL;
     int in_func = FALSE_, in_block = FALSE_;
     LINE_TYPE loc;
     char gr_nm[PATH_MAX];
+    int num_funcs = file_size / BYTES_PER_FUNCTION;
+    IRFuncs block_map;
+    block_map.func_size = 0;
+    block_map.funcs = (Function*) malloc(num_funcs * sizeof(Function));
+    block_map.regs = (Register_mapping*) malloc(num_funcs * sizeof(Register_mapping));
 
-    std::vector<Function> block_map;
-    block_map.emplace_back();
-
-    std::vector<Register_mapping> reg_map;
-    reg_map.emplace_back();
+    new (&block_map.funcs[block_map.func_size]) Function();
+    new (&block_map.regs[block_map.func_size]) Register_mapping();
 
     std::regex re("(@[A-Za-z0-9._]+)");
     std::cmatch match_out;
@@ -535,7 +543,7 @@ void analyze_registers(FILE *fp, char fl_name[], int full_file){
         }
 
         /* Interesting stuff in here */
-        loc = set_up_blocks(line,block_map[funcidx],block_idx,reg_map[funcidx],reg_idx);
+        loc = set_up_blocks(line,block_map.funcs[block_map.func_size],block_idx,block_map.regs[block_map.func_size],reg_idx);
         in_block = (loc != LINE_TYPE::BRANCH) ? TRUE_ : FALSE_;
 
         if (line[0] == '}'){        // This is wrong right now and the function never ends TODO: to implement multiple funcs, you fix state machine order first
@@ -544,15 +552,17 @@ void analyze_registers(FILE *fp, char fl_name[], int full_file){
             in_block = FALSE_;
 
             /* Core liveness tracking. All this will have to change for multiple funcs */
-            compute_use_def_block(block_map[funcidx],reg_map[funcidx], reg_idx);
-            compute_in_out(block_map[funcidx], reg_idx);
+            compute_use_def_block(block_map.funcs[block_map.func_size],block_map.regs[block_map.func_size], reg_idx);
+            compute_in_out(block_map.funcs[block_map.func_size], reg_idx);
 
             /* Here we make the edge list given we have populated all necessary structures */
-            generate_edge_list(block_map[funcidx], reg_map[funcidx], reg_idx, gr_nm);
+            generate_edge_list(block_map.funcs[block_map.func_size], block_map.regs[block_map.func_size], reg_idx, gr_nm);
 
-            funcidx++;
-            block_map.emplace_back();
-            reg_map.emplace_back();
+            block_map.func_size++;
+
+            new (&block_map.funcs[block_map.func_size]) Function();
+            new (&block_map.regs[block_map.func_size]) Register_mapping();
+            reg_idx = 0;
 
 
         } else { line_idx++; }
@@ -596,6 +606,10 @@ int main(int argc, char **argv){
         return EXIT_FAILURE;
     }
 
+    struct stat st;
+    stat(fl_name, &st);
+    int size = st.st_size;
+
     char * last = strrchr(fl_name,'/');
     *last = 'a';
     char * second_last = strrchr(fl_name,'/');
@@ -610,7 +624,8 @@ int main(int argc, char **argv){
     graph_file_ttl[pathname_len] = '\0';
     strcat(graph_file_ttl,"/output_graph/");
     strncat(graph_file_ttl,last+1,size_noll);
-    analyze_registers(fp,graph_file_ttl ,0);
+    analyze_registers(fp,graph_file_ttl ,size);
 
     return EXIT_SUCCESS;
+
 }
