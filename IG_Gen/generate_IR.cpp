@@ -729,24 +729,35 @@ void recursively_populate(Edge_list_funcs * el_list, int func_idx, int * vidx_of
 {
     int myoffset = *vidx_offset;
     // step 1: print current funcs edges
+    for (int k = 0; k < rhs->cur_depth+1; k++) fprintf(fp, "\t");
+    fprintf(fp, "FUNC CALL %s REC DEPTH %d MYOFFSET %d STEP 1 (basic edge list):\n", el_list[func_idx].func_name, rhs->cur_depth+1, myoffset);
     for (int i = 0; i < el_list[func_idx].num_edges; i++)
     {
+        for (int k = 0; k < rhs->cur_depth+1; k++) fprintf(fp, "\t");
         fprintf(fp, "e %d %d\n", el_list[func_idx].edges[i*2]+myoffset, el_list[func_idx].edges[i*2+1]+myoffset);
     }
     // step 2: deal with parents interferences
     *vidx_offset += el_list[func_idx].num_verts;
+    for (int k = 0; k < rhs->cur_depth+1; k++) fprintf(fp, "\t");
+    fprintf(fp, "FUNC CALL %s REC DEPTH %d MYOFFSET %d STEP 2 (parental interference):\n", el_list[func_idx].func_name, rhs->cur_depth+1, myoffset);
     //for each u in func neighbors of entire parent call chain
     for (int stackidx = 0; stackidx < rhs->cur_depth+1; stackidx++)
     {
         for (int u = 0; u < rhs->helper[stackidx].num_neighbors; u++)
         {
             int u_offset = rhs->helper[stackidx].neighbors[u] + rhs->helper[stackidx].offset;
-            for (int v = *vidx_offset; v < *vidx_offset+el_list[func_idx].num_verts; ++v)
+            for (int v = myoffset; v < myoffset+el_list[func_idx].num_verts; ++v)
+            {
+                for (int k = 0; k < rhs->cur_depth+1; k++) fprintf(fp, "\t");
                 fprintf(fp, "e %d %d\n", u_offset, v);
+            }
+
         }
     }
 
     // step 3: iterate through func calls
+    for (int k = 0; k < rhs->cur_depth+1; k++) fprintf(fp, "\t");
+    fprintf(fp, "FUNC CALL %s REC DEPTH %d MYOFFSET %d STEP 3 (recursive calls):\n", el_list[func_idx].func_name, rhs->cur_depth+1, myoffset);
     for (int i = 0; i < el_list[func_idx].num_funcs; i++)
     {
         int next = find_func(el_list, el_list[func_idx].calls[i].func_id, num_funcs);
@@ -754,8 +765,10 @@ void recursively_populate(Edge_list_funcs * el_list, int func_idx, int * vidx_of
         if (next == -1)
         {
             // if the function's graph isnt known (i.e. dlls), all we can do is drop the label and its interferences
+            for (int k = 0; k < rhs->cur_depth+1; k++) fprintf(fp, "\t");
             fprintf(fp, "%s", el_list[func_idx].calls[i].func_id);
             for (int j = 0; j < el_list[func_idx].calls[i].num_connections; ++j){
+                for (int k = 0; k < rhs->cur_depth+1; k++) fprintf(fp, "\t");
                 fprintf(fp, " %d", el_list[func_idx].calls[i].neighbors[j] + myoffset);
             }
         }
