@@ -1,5 +1,5 @@
-; ModuleID = './IG_Gen/LLVM_IR/test2.ll'
-source_filename = "./IG_Gen/code_data/test2.c"
+; ModuleID = './LLVM_IR/test2.ll'
+source_filename = "./code_data/test2.c"
 target datalayout = "e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-i128:128-f80:128-n8:16:32:64-S128"
 target triple = "x86_64-pc-linux-gnu"
 
@@ -16,13 +16,15 @@ define dso_local i32 @func1() #0 {
 define dso_local i32 @func2(i32 noundef %0) #0 {
   %2 = add nsw i32 3, 0
   %3 = add nsw i32 0, 0
-  %4 = add nsw i32 %2, %3
-  %5 = add nsw i32 %0, %4
-  ret i32 %5
+  %4 = call i32 @func1()
+  %5 = add nsw i32 %3, %4
+  %6 = add nsw i32 %2, %5
+  %7 = add nsw i32 %0, %6
+  ret i32 %7
 }
 
 ; Function Attrs: noinline nounwind uwtable
-define dso_local i32 @combine() #0 {
+define dso_local i32 @main() #0 {
   %1 = mul nsw i32 3, 2
   %2 = call i32 @func1()
   %3 = call i32 @func2(i32 noundef %1)

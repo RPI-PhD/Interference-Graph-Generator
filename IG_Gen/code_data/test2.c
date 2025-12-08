@@ -21,7 +21,7 @@ int func2(int i)
     int l = 0;
     int o = 0;
     int u = k+l;
-    int w = o+l;
+    int w = o+l+func1();
     int z = u+w;
     int t = z;
     return j+t;

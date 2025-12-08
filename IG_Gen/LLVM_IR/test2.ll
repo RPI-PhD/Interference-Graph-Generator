@@ -1,5 +1,5 @@
-; ModuleID = './IG_Gen/code_data/test2.c'
-source_filename = "./IG_Gen/code_data/test2.c"
+; ModuleID = './code_data/test2.c'
+source_filename = "./code_data/test2.c"
 target datalayout = "e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-i128:128-f80:128-n8:16:32:64-S128"
 target triple = "x86_64-pc-linux-gnu"
 
@@ -61,17 +61,19 @@ define dso_local i32 @func2(i32 noundef %0) #0 {
   %15 = load i32, ptr %6, align 4
   %16 = load i32, ptr %5, align 4
   %17 = add nsw i32 %15, %16
-  store i32 %17, ptr %8, align 4
-  %18 = load i32, ptr %7, align 4
-  %19 = load i32, ptr %8, align 4
-  %20 = add nsw i32 %18, %19
-  store i32 %20, ptr %9, align 4
-  %21 = load i32, ptr %9, align 4
-  store i32 %21, ptr %10, align 4
-  %22 = load i32, ptr %3, align 4
-  %23 = load i32, ptr %10, align 4
-  %24 = add nsw i32 %22, %23
-  ret i32 %24
+  %18 = call i32 @func1()
+  %19 = add nsw i32 %17, %18
+  store i32 %19, ptr %8, align 4
+  %20 = load i32, ptr %7, align 4
+  %21 = load i32, ptr %8, align 4
+  %22 = add nsw i32 %20, %21
+  store i32 %22, ptr %9, align 4
+  %23 = load i32, ptr %9, align 4
+  store i32 %23, ptr %10, align 4
+  %24 = load i32, ptr %3, align 4
+  %25 = load i32, ptr %10, align 4
+  %26 = add nsw i32 %24, %25
+  ret i32 %26
 }
 
 ; Function Attrs: noinline nounwind  uwtable
