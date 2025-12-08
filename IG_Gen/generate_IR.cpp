@@ -893,7 +893,7 @@ void analyze_registers(FILE *fp, char fl_name[], int file_size, int recursive){
         loc = set_up_blocks(line,block_map.funcs[block_map.func_size],block_idx,block_map.regs[block_map.func_size],reg_idx);
         in_block = (loc != LINE_TYPE::BRANCH) ? TRUE_ : FALSE_;
 
-        if (line[0] == '}'){        // This is wrong right now and the function never ends TODO: to implement multiple funcs, you fix state machine order first
+        if (line[0] == '}'){
             line_idx = 0;
             in_func = FALSE_;
             in_block = FALSE_;
@@ -903,7 +903,6 @@ void analyze_registers(FILE *fp, char fl_name[], int file_size, int recursive){
             compute_in_out(block_map.funcs[block_map.func_size], reg_idx);
 
             /* Here we make the edge list given we have populated all necessary structures */
-
 
             block_map.func_size++;
 
