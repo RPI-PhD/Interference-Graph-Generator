@@ -624,17 +624,42 @@ void compute_in_out(Function &blocks, int num_regs){
     free(out_copy.bits);
 }
 
+/*
+*    size_t label;
+
+    size_t instr_len;   // space malloc'd
+    size_t num_instr;   // number of instructions we have
+
+    size_t Phi_len;
+    size_t num_Phi;
+
+    size_t num_succ;    // number of successors we have
+    size_t succ_len;    // space malloc'd
+
+    bitReg use_block;   // Doing this because per block requires WAY more registers than per instruction
+    bitReg def_block;
+    bitReg in_block;
+    bitReg out_block;
+
+    int *successors;    //instead of Block**, just have array of indices to look up in Function
+
+    Instruct *instrcts;
+    Phi *phis;
+    */
+
 void free_heap_alloc(Function &blocks){
     for (std::pair<const size_t,Block> &block : blocks){
 
         Block *bl = &block.second;
 
+        for (int i = 0; i < (int)bl->num_instr; i++) if (bl->instrcts[i].func_name != NULL) free(bl->instrcts[i].func_name);
         free(bl->instrcts);
         free(bl->successors);
         free(bl->use_block.bits);
         free(bl->def_block.bits);
         free(bl->in_block.bits);
         free(bl->out_block.bits);
+        free(bl->phis);
 
     }
 }
@@ -833,6 +858,7 @@ void cleanup(Edge_list_funcs * el_list, Recursion_helper_stack * rhs, int numfun
         }
         free(el_list[i].calls);
         free(el_list[i].edges);
+        free(el_list[i].func_name);
     }
     free(rhs->helper);
     free(el_list);
@@ -901,7 +927,7 @@ void generate_all_edge_lists(IRFuncs &funcs, char* fl_name, int recursive)
 <<<<<<< HEAD
 <<<<<<< HEAD
         init_rhs(rhs);
-        recursively_populate(el, main_idx, &idx_offset, funcs.func_size, rhs, fp);
+        if (main_idx != -1) recursively_populate(el, main_idx, &idx_offset, funcs.func_size, rhs, fp);
         fclose(fp);
     }
     cleanup(el, rhs, funcs.func_size);
@@ -1022,6 +1048,13 @@ void analyze_registers(FILE *fp, char fl_name[], int file_size, int recursive){
     free(block_map.regs);
 =======
 >>>>>>> 0a73154 (undoing ethans stupidity)
+
+    for (int i = 0; i < (int)block_map.func_size; i++)
+    {
+        free_heap_alloc(block_map.funcs[i]);
+        block_map.funcs[i].~Function();
+        block_map.regs[i].~Register_mapping();
+    }
 
     free(block_map.func_names);
     free(block_map.funcs);
