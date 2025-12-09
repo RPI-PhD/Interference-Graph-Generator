@@ -71,8 +71,6 @@ typedef struct {
     Instruct *instrcts;
     Phi *phis;
 
-    int test_count;
-
 } Block;  // TODO: This became really big and should probably be broken into multiple structs (bitstruct, successor struct, etc)
 
 typedef struct
@@ -235,10 +233,10 @@ void rhs_push(Recursion_helper_stack * rhs, Recursion_helper * rh)
         rhs->alloc_size = rhs->alloc_size * 2;
         rhs->helper = (Recursion_helper *)realloc(rhs->helper, sizeof(Recursion_helper) * rhs->alloc_size);
     }
-    rhs->helper[rhs->cur_depth+1].offset = rh->offset;
-    rhs->helper[rhs->cur_depth+1].neighbors = rh->neighbors;
-    rhs->helper[rhs->cur_depth+1].num_neighbors = rh->num_neighbors;
     rhs->cur_depth++;
+    rhs->helper[rhs->cur_depth].offset = rh->offset;
+    rhs->helper[rhs->cur_depth].neighbors = rh->neighbors;
+    rhs->helper[rhs->cur_depth].num_neighbors = rh->num_neighbors;
 }
 
 void compute_use_def_block(Function &blocks,Register_mapping &regMap, int num_regs){
@@ -459,10 +457,6 @@ void compute_successors(const char *line,
     std::cregex_iterator it(line,txt_end,re);
     std::cregex_iterator end;
 
-    if (block->test_count > 1){
-        fprintf(stderr,"OH NOOOOO %d\n",block->test_count);
-    }
-
     block->successors = (int*)malloc(it->size() * sizeof(int));
     block->succ_len = it->size();
 
@@ -565,7 +559,6 @@ LINE_TYPE set_up_blocks(const char *line, Function &blocks,
      * Went with a hash table instead of tree just cuz (would've done tree if still in C)
      */
     if (strncmp(line,"  br", 4) == 0){
-        block->test_count++;
         compute_successors(line,block,regMap,reg_idx);
         return LINE_TYPE::BRANCH;
     }
@@ -794,17 +787,17 @@ void recursively_populate(Edge_list_funcs * el_list, int func_idx, int * vidx_of
 {
     int myoffset = *vidx_offset;
     // step 1: print current funcs edges
-    for (int k = 0; k < rhs->cur_depth+1; k++) fprintf(fp, "\t");
-    fprintf(fp, "FUNC CALL %s REC DEPTH %d MYOFFSET %d STEP 1 (basic edge list):\n", el_list[func_idx].func_name, rhs->cur_depth+1, myoffset);
+    // for (int k = 0; k < rhs->cur_depth+1; k++) fprintf(fp, "\t");
+    // fprintf(fp, "FUNC CALL %s REC DEPTH %d MYOFFSET %d STEP 1 (basic edge list):\n", el_list[func_idx].func_name, rhs->cur_depth+1, myoffset);
     for (int i = 0; i < el_list[func_idx].num_edges; i++)
     {
-        for (int k = 0; k < rhs->cur_depth+1; k++) fprintf(fp, "\t");
+        // for (int k = 0; k < rhs->cur_depth+1; k++) fprintf(fp, "\t");
         fprintf(fp, "e %d %d\n", el_list[func_idx].edges[i*2]+myoffset, el_list[func_idx].edges[i*2+1]+myoffset);
     }
     // step 2: deal with parents interferences
     *vidx_offset += el_list[func_idx].num_verts;
     for (int k = 0; k < rhs->cur_depth+1; k++) fprintf(fp, "\t");
-    fprintf(fp, "FUNC CALL %s REC DEPTH %d MYOFFSET %d STEP 2 (parental interference):\n", el_list[func_idx].func_name, rhs->cur_depth+1, myoffset);
+    // fprintf(fp, "FUNC CALL %s REC DEPTH %d MYOFFSET %d STEP 2 (parental interference):\n", el_list[func_idx].func_name, rhs->cur_depth+1, myoffset);
     //for each u in func neighbors of entire parent call chain
     for (int stackidx = 0; stackidx < rhs->cur_depth+1; stackidx++)
     {
@@ -813,7 +806,7 @@ void recursively_populate(Edge_list_funcs * el_list, int func_idx, int * vidx_of
             int u_offset = rhs->helper[stackidx].neighbors[u] + rhs->helper[stackidx].offset;
             for (int v = myoffset; v < myoffset+el_list[func_idx].num_verts; ++v)
             {
-                for (int k = 0; k < rhs->cur_depth+1; k++) fprintf(fp, "\t");
+                // for (int k = 0; k < rhs->cur_depth+1; k++) fprintf(fp, "\t");
                 fprintf(fp, "e %d %d\n", u_offset, v);
             }
 
@@ -821,8 +814,8 @@ void recursively_populate(Edge_list_funcs * el_list, int func_idx, int * vidx_of
     }
 
     // step 3: iterate through func calls
-    for (int k = 0; k < rhs->cur_depth+1; k++) fprintf(fp, "\t");
-    fprintf(fp, "FUNC CALL %s REC DEPTH %d MYOFFSET %d STEP 3 (recursive calls):\n", el_list[func_idx].func_name, rhs->cur_depth+1, myoffset);
+    // for (int k = 0; k < rhs->cur_depth+1; k++) fprintf(fp, "\t");
+    // fprintf(fp, "FUNC CALL %s REC DEPTH %d MYOFFSET %d STEP 3 (recursive calls):\n", el_list[func_idx].func_name, rhs->cur_depth+1, myoffset);
     for (int i = 0; i < el_list[func_idx].num_funcs; i++)
     {
         int next = find_func(el_list, el_list[func_idx].calls[i].func_id, num_funcs);
@@ -830,12 +823,12 @@ void recursively_populate(Edge_list_funcs * el_list, int func_idx, int * vidx_of
         if (next == -1)
         {
             // if the function's graph isnt known (i.e. dlls), all we can do is drop the label and its interferences
-            for (int k = 0; k < rhs->cur_depth+1; k++) fprintf(fp, "\t");
+            // for (int k = 0; k < rhs->cur_depth+1; k++) fprintf(fp, "\t");
             fprintf(fp, "%s", el_list[func_idx].calls[i].func_id);
             for (int j = 0; j < el_list[func_idx].calls[i].num_connections; ++j){
-                for (int k = 0; k < rhs->cur_depth+1; k++) fprintf(fp, "\t");
                 fprintf(fp, " %d", el_list[func_idx].calls[i].neighbors[j] + myoffset);
             }
+            fprintf(fp, "\n");
         }
         else
         {
@@ -848,7 +841,7 @@ void recursively_populate(Edge_list_funcs * el_list, int func_idx, int * vidx_of
             recursively_populate(el_list, next, vidx_offset, num_funcs, rhs, fp);
         }
     }
-    rhs->cur_depth--;
+    if (rhs->cur_depth >= 0) rhs->cur_depth--;
 }
 
 <<<<<<< HEAD
@@ -929,12 +922,25 @@ void generate_all_edge_lists(IRFuncs &funcs, char* fl_name, int recursive)
 >>>>>>> 955d7f1 (ethan spreads false information and maliciously deletes files on my computer so he can blame it on me)
     if (recursive)
     {
-        fprintf(fp, "\nFULL GRAPH:\n\n");
+
         int idx_offset = 0;
 <<<<<<< HEAD
 <<<<<<< HEAD
         init_rhs(rhs);
-        if (main_idx != -1) recursively_populate(el, main_idx, &idx_offset, funcs.func_size, rhs, fp);
+        if (main_idx != -1)
+        {
+            fprintf(fp, "\nFULL GRAPH EXPANDED FROM main:\n\n");
+            recursively_populate(el, main_idx, &idx_offset, funcs.func_size, rhs, fp);
+        }
+        else
+        {
+            for (int ii = 0; ii < (int)funcs.func_size; ii++)
+            {
+                fprintf(fp, "\nFUNCTION SUBGRAPH EXPANDED FROM %s:\n\n", el[ii].func_name);
+                recursively_populate(el, ii, &idx_offset, funcs.func_size, rhs, fp);
+                idx_offset = 0;
+            }
+        }
         fclose(fp);
     }
     cleanup(el, rhs, funcs.func_size);
@@ -961,7 +967,7 @@ void generate_all_edge_lists(IRFuncs &funcs, char* fl_name, int recursive)
  */
 void analyze_registers(FILE *fp, char fl_name[], int file_size, int recursive){
 
-    size_t len = 0, block_idx = 0, line_idx = 0;
+    size_t len = 0, block_idx = 2, line_idx = 0;
     int reg_idx = 0;
     char *line = NULL;
     int in_func = FALSE_, in_block = FALSE_;
@@ -979,7 +985,6 @@ void analyze_registers(FILE *fp, char fl_name[], int file_size, int recursive){
 
     std::regex re("(@[A-Za-z0-9._]+)");
     std::regex re_find_start("(%[A-Za-z0-9._]+)");
-
     std::cmatch match_out;
 
     while (getline(&line, &len, fp) != -1) {
@@ -1087,7 +1092,6 @@ int main(int argc, char **argv){
     }
 
     fl_name = argv[1];
-    printf("\n\nPROCESSING FILE: %s\n\n", fl_name);
 
     fp = fopen(fl_name,"r");
 
@@ -1117,8 +1121,6 @@ int main(int argc, char **argv){
     printf("\n\nPROCESSING FILE: %s\n\n", graph_file_ttl);
 =======
 >>>>>>> 0a73154 (undoing ethans stupidity)
-
-    printf("\n\nOUTPUT FILE: %s\n\n.txt", graph_file_ttl);
 
     analyze_registers(fp,graph_file_ttl ,size, 1);
 
