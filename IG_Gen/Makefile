@@ -1,24 +1,24 @@
 CXX = g++
-override CXXFLAGS := -Wall -std=c++17 -Werror -pedantic -g -fsanitize=undefined $(CXXFLAGS)
+override CXXFLAGS := -Wall -std=c++17 -Werror -pedantic -g -fsanitize=undefined -fsanitize=address $(CXXFLAGS)
 
-INPUT_DIR = code_data
+INP_DIR = code_data
+IR_DIR = LLVM_IR
+OUT_DIR = output_graph
 
-# Target executable
-TARGET =
-
-# For deleting the target
-TARGET_DEL =
-
-IR_FILES = $(wildcard $(INPUT_DIR)/*.txt)
+INP_FILES = $(wildcard $(INP_DIR)/*.c)
+IR_FILES = $(wildcard $(IR_DIR)/*-mem2reg.ll)
+OUTPUT_FILES = $(wildcard $(OUT_DIR)/*.txt)
 
 # Source files
-SRCS = generate_IR.cpp
+GEN_SRC = generate_IR.cpp
+TARGET = $(GEN_SRC:.cpp=)
+GEN_EXE = ./$(TARGET)
 
 # Object files
-OBJS = $(SRCS:.cpp=.o)
+OBJS = $(GEN_SRC:.cpp=.o)
 
 all: run
-.PHONY: clean run genfiles
+.PHONY: clean run genfiles clean_full
 
 # Rule to link object files into the target executable
 $(TARGET): $(OBJS)
@@ -28,13 +28,16 @@ $(TARGET): $(OBJS)
 %.o: %.cpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-run: genfiles
-	/bin/bash run_generator.sh "$(GEN_EXE)" "$(IR_FILES)"
+run: $(TARGET) genfiles
+	/bin/bash run_generator.sh "$(GEN_EXE)" $(IR_FILES)
 
 # Generate all the ir files from the data
 genfiles:
-	/bin/bash compile_to_ir.sh
+	/bin/bash compile_to_ir.sh $(INP_FILES)
 
 # Clean rule to remove generated files
 clean:
-	rm -f *.o *~ $(TESTDIR)/*.o $(test_files)
+	rm -f *.o *~ $(TARGET)
+
+clean_full: clean
+	rm -f $(IR_DIR)/*.ll $(IR_FILES) $(OUTPUT_FILES)

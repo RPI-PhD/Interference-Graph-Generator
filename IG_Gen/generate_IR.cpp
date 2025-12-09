@@ -44,7 +44,7 @@ typedef struct {
 } Phi;
 
 typedef struct {
-    size_t reglines;
+    short reglines;
     BITSIZE *bits;
 } bitReg;
 
@@ -137,19 +137,19 @@ static void init_bits(bitReg *regs, int reg_num){
 
 // a - b
 static inline void bit_diff(bitReg *out, bitReg *a, bitReg *b){
-    for (int i = 0; i < out->reglines; ++i){
+    for (short i = 0; i < out->reglines; ++i){
         out->bits[i] = a->bits[i] & ~b->bits[i];
     }
 }
 
 static inline void bit_union_or(bitReg *out, bitReg *a, bitReg *b){
-    for (int i = 0; i < out->reglines; ++i){
+    for (short i = 0; i < out->reglines; ++i){
         out->bits[i] = a->bits[i] | b->bits[i];
     }
 }
 
 static inline void bit_intersection_and(bitReg *out, bitReg *a, bitReg *b){
-    for (int i = 0; i < out->reglines; ++i){
+    for (short i = 0; i < out->reglines; ++i){
         out->bits[i] = a->bits[i] & b->bits[i];
     }
 }
@@ -241,7 +241,9 @@ void rhs_push(Recursion_helper_stack * rhs, Recursion_helper * rh)
 
 void compute_use_def_block(Function &blocks,Register_mapping &regMap, int num_regs){
 
-    int reg, i, reg_ID, jmp;
+    int reg_ID, jmp;
+    size_t reg, i;
+
     Block *pred_block;
 
     for (std::pair<const size_t,Block> &block : blocks){
@@ -539,7 +541,8 @@ LINE_TYPE set_up_blocks(const char *line, Function &blocks,
 
 // https://www.geeksforgeeks.org/compiler-design/liveliness-analysis-in-compiler-design/
 void compute_in_out(Function &blocks, int num_regs){
-    int i, in_diff, out_diff;
+    int in_diff, out_diff;
+    size_t i;
 
     bitReg in_copy, out_copy, tmp;
 
@@ -635,7 +638,8 @@ void generate_edge_list(Function &blocks,
                         Register_mapping regmap,
                         FILE* fp,
                         Edge_list_funcs * el){
-    int i, d, r, u, regnum_d, regnum_u;
+    int i, r, regnum_d, regnum_u;
+    size_t d, u;
     Block *bl;
     bitReg *out;
     Instruct I;
@@ -791,7 +795,9 @@ void generate_all_edge_lists(IRFuncs &funcs, char* fl_name, int recursive)
     FILE* fp;
     Edge_list_funcs * el = (Edge_list_funcs*) malloc(sizeof(Edge_list_funcs) * funcs.func_size);
     int main_idx = -1;
-    for (int i = 0; i < funcs.func_size; ++i)
+    size_t i;
+
+    for (i = 0; i < funcs.func_size; ++i)
     {
         char * funcname = funcs.func_names + i * PATH_MAX;
         init_EL(el + i, funcname);
@@ -804,9 +810,9 @@ void generate_all_edge_lists(IRFuncs &funcs, char* fl_name, int recursive)
         {
             strcat(fl_name, ".txt");
             fp = create_edgelist_file(fl_name);
-            fprintf(fp, "%s (%d verts):\n\n", funcname, funcs.regs[i].size());
+            fprintf(fp, "%s (%ld verts):\n\n", funcname, funcs.regs[i].size());
         }
-        else fprintf(fp, "\n%s (%d verts):\n\n", funcname, funcs.regs[i].size());
+        else fprintf(fp, "\n%s (%ld verts):\n\n", funcname, funcs.regs[i].size());
         if (strcmp(funcname, "main") == 0) main_idx = i;
         generate_edge_list(funcs.funcs[i], funcs.regs[i], fp, el + i);
         if (!recursive) fclose(fp);
@@ -829,12 +835,11 @@ void generate_all_edge_lists(IRFuncs &funcs, char* fl_name, int recursive)
  */
 void analyze_registers(FILE *fp, char fl_name[], int file_size, int recursive){
 
-    size_t len = 0, block_idx = 2, line_idx = 0, i;
+    size_t len = 0, block_idx = 2, line_idx = 0;
     int reg_idx = 0;
     char *line = NULL;
     int in_func = FALSE_, in_block = FALSE_;
     LINE_TYPE loc;
-    char gr_nm[PATH_MAX];
     int num_funcs = file_size / BYTES_PER_FUNCTION;
     IRFuncs block_map;
 
@@ -910,7 +915,6 @@ void analyze_registers(FILE *fp, char fl_name[], int file_size, int recursive){
             new (&block_map.regs[block_map.func_size]) Register_mapping();
             reg_idx = 0;
 
-
         } else { line_idx++; }
     }
 
@@ -931,7 +935,6 @@ int main(int argc, char **argv){
 
     char *fl_name;
     FILE *fp;
-    char abs_path[PATH_MAX];
     char graph_file_ttl[PATH_MAX];
     size_t len_ll, size_noll;
 
@@ -942,12 +945,7 @@ int main(int argc, char **argv){
 
     fl_name = argv[1];
 
-    if (realpath(fl_name, abs_path) == NULL){
-        fprintf(stderr,"Unable to get cwd\n");
-        return EXIT_FAILURE;
-    }
-
-    fp = fopen(abs_path,"r");
+    fp = fopen(fl_name,"r");
 
     if (fp == NULL){
         fprintf(stderr,"Could not open file %s\n",fl_name);
@@ -971,6 +969,7 @@ int main(int argc, char **argv){
     graph_file_ttl[pathname_len] = '\0';
     strcat(graph_file_ttl,"/output_graph/");
     strncat(graph_file_ttl,last+1,size_noll);
+
     analyze_registers(fp,graph_file_ttl ,size, 1);
 
     return EXIT_SUCCESS;
