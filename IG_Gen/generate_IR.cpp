@@ -218,7 +218,7 @@ const char * reg_machine(const char *p, long &len)
 
     for (; *p != '%' && *p != '\n'; ++p){}
 
-    while (*p != '\n' && *p != ',' && *p != ' ' && *p != '('){
+    while (*p != '\n' && *p != ',' && *p != ' ' && *p != ')'){
         if (*p == '%'){
             start = p;
         }
@@ -314,14 +314,12 @@ void rhs_push(Recursion_helper_stack * rhs, Recursion_helper * rh)
 
 void compute_use_def_block(Function &blocks,Register_mapping &regMap, int num_regs){
 
-    int reg_ID, jmp;
+    int reg_ID;
     size_t reg, i;
 
     for (std::pair<const size_t,Block> &block : blocks){
 
         Block *bl = &block.second;
-
-        std::cout << bl->label << std::endl;
 
         init_bits(&bl->use_block,num_regs);
         init_bits(&bl->def_block,num_regs);
@@ -543,7 +541,7 @@ void compute_use_def_instr(const char *line,
     block->num_instr++;
 }
 
-void compute_successors(const char *line,
+void compute_successors(char *line,
                         Block *block,
                         Register_mapping &regMap,
                         int &reg_idx){
@@ -606,13 +604,15 @@ void compute_successors(const char *line,
 }
 
 // Note to self: Function will be on the stack...only need 1
-LINE_TYPE set_up_blocks(const char *line, Function &blocks,
+LINE_TYPE set_up_blocks(char *line, Function &blocks,
                         size_t block_idx,
                         Register_mapping &regMap,
-                        int &reg_idx){
+                        int &reg_idx,
+                        FILE *fp){
 
     Block *block;
     int is_phi = FALSE_;
+    size_t len;
 
     /* Dynamic resizing of data structures cuz I started this in c :C */
 
@@ -672,6 +672,20 @@ LINE_TYPE set_up_blocks(const char *line, Function &blocks,
      *
      * Went with a hash table instead of tree just cuz (would've done tree if still in C)
      */
+
+    if (strncmp(line,"  switch", 8) == 0){
+
+        while (line[2] != ']'){
+
+            compute_successors(line,block,regMap,reg_idx);
+            getline(&line, &len, fp);
+
+        }
+
+        return LINE_TYPE::BRANCH;
+    }
+
+
     if (strncmp(line,"  br", 4) == 0){
         compute_successors(line,block,regMap,reg_idx);
         return LINE_TYPE::BRANCH;
@@ -1151,7 +1165,7 @@ void analyze_registers(FILE *fp, char fl_name[], int file_size, int recursive){
         }
 
         /* Interesting stuff in here */
-        loc = set_up_blocks(line,block_map.funcs[block_map.func_size],block_idx,block_map.regs[block_map.func_size],reg_idx);
+        loc = set_up_blocks(line,block_map.funcs[block_map.func_size],block_idx,block_map.regs[block_map.func_size],reg_idx,fp);
         in_block = (loc != LINE_TYPE::BRANCH) ? TRUE_ : FALSE_;
 
         if (line[0] == '}'){
