@@ -820,6 +820,9 @@ void recursively_populate(Edge_list_funcs * el_list, int func_idx, int * vidx_of
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 955d7f1 (ethan spreads false information and maliciously deletes files on my computer so he can blame it on me)
 void cleanup(Edge_list_funcs * el_list, Recursion_helper_stack * rhs, int numfuncs)
 {
     for (int i = 0; i < numfuncs; i++)
@@ -836,6 +839,7 @@ void cleanup(Edge_list_funcs * el_list, Recursion_helper_stack * rhs, int numfun
     free(rhs);
 }
 
+<<<<<<< HEAD
 void generate_all_edge_lists(IRFuncs &funcs, char* fl_name, int recursive)
 {
     FILE* fp = NULL;
@@ -844,6 +848,11 @@ void generate_all_edge_lists(IRFuncs &funcs, char* fl_name, int recursive)
 {
     FILE* fp;
 >>>>>>> 0a73154 (undoing ethans stupidity)
+=======
+void generate_all_edge_lists(IRFuncs &funcs, char* fl_name, int recursive)
+{
+    FILE* fp = NULL;
+>>>>>>> 955d7f1 (ethan spreads false information and maliciously deletes files on my computer so he can blame it on me)
     Edge_list_funcs * el = (Edge_list_funcs*) malloc(sizeof(Edge_list_funcs) * funcs.func_size);
     int main_idx = -1;
     size_t i;
@@ -869,6 +878,9 @@ void generate_all_edge_lists(IRFuncs &funcs, char* fl_name, int recursive)
         if (!recursive) fclose(fp);
     }
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 955d7f1 (ethan spreads false information and maliciously deletes files on my computer so he can blame it on me)
     if (fp == NULL)
     {
         strcat(fl_name, ".txt");
@@ -877,12 +889,16 @@ void generate_all_edge_lists(IRFuncs &funcs, char* fl_name, int recursive)
         return;
     }
     Recursion_helper_stack * rhs = (Recursion_helper_stack *) malloc(sizeof(Recursion_helper_stack));
+<<<<<<< HEAD
 =======
 >>>>>>> 0a73154 (undoing ethans stupidity)
+=======
+>>>>>>> 955d7f1 (ethan spreads false information and maliciously deletes files on my computer so he can blame it on me)
     if (recursive)
     {
         fprintf(fp, "\nFULL GRAPH:\n\n");
         int idx_offset = 0;
+<<<<<<< HEAD
 <<<<<<< HEAD
         init_rhs(rhs);
         recursively_populate(el, main_idx, &idx_offset, funcs.func_size, rhs, fp);
@@ -897,6 +913,13 @@ void generate_all_edge_lists(IRFuncs &funcs, char* fl_name, int recursive)
     }
 
 >>>>>>> 0a73154 (undoing ethans stupidity)
+=======
+        init_rhs(rhs);
+        recursively_populate(el, main_idx, &idx_offset, funcs.func_size, rhs, fp);
+        fclose(fp);
+    }
+    cleanup(el, rhs, funcs.func_size);
+>>>>>>> 955d7f1 (ethan spreads false information and maliciously deletes files on my computer so he can blame it on me)
 }
 
 /*
@@ -1000,7 +1023,9 @@ void analyze_registers(FILE *fp, char fl_name[], int file_size, int recursive){
 =======
 >>>>>>> 0a73154 (undoing ethans stupidity)
 
-
+    free(block_map.func_names);
+    free(block_map.funcs);
+    free(block_map.regs);
 
 
     /* Not implemented. This program will brick your computer */
@@ -1020,6 +1045,7 @@ int main(int argc, char **argv){
     }
 
     fl_name = argv[1];
+    printf("\n\nPROCESSING FILE: %s\n\n", fl_name);
 
     fp = fopen(fl_name,"r");
 
@@ -1049,6 +1075,8 @@ int main(int argc, char **argv){
     printf("\n\nPROCESSING FILE: %s\n\n", graph_file_ttl);
 =======
 >>>>>>> 0a73154 (undoing ethans stupidity)
+
+    printf("\n\nOUTPUT FILE: %s\n\n", graph_file_ttl);
 
     analyze_registers(fp,graph_file_ttl ,size, 1);
 
