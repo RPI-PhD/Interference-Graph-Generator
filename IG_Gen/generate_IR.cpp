@@ -177,11 +177,78 @@ static inline void clear_bits(bitReg *regs){
 }
 /*
  * String search state machines
+ * phi_machine = std::regex phi_pair_re(R"(\[\s*([^,\]]+)\s*,\s*([^]\]]+)\])");
+*  reg_machine = std::regex re("(%[A-Za-z0-9._]+)");
+   func_machine = std::regex re("(@[A-Za-z0-9._]+)");
  */
 
-void phi_machine(const char *p){}
-void reg_machine(const char *p){}
-void func_machine(const char *p){}
+const char * phi_machine(const char *p, long &len)
+{
+    const char * start_tok = NULL;
+    len = 0;
+    // ex %.01 = phi i32 [ 0, %4 ], [ %40, %39 ], ...
+    while(*p != '\n')
+    {
+        if (*p == '[' || (*p == ',' && *(p-1) != ']'))
+        {
+            start_tok = p + 2;
+            p = start_tok;
+            // if it reaches here, it found a start character
+            break;
+        }
+        p++;
+    }
+    // if it didn't find a start char, it skips this loop
+    if (*p != '\n')
+    {
+        while (*p != ',' && *p != ' ')
+        {
+            p++;
+        }
+    }
+
+    if (start_tok != NULL) len = p - start_tok;
+    return start_tok;
+}
+
+const char * reg_machine(const char *p, long &len)
+{
+    const char * start = NULL;
+    len = 0;
+
+    printf("searching str: %s\n", p);
+    for (; *p != '%' && *p != '\n'; ++p){}
+
+    while (*p != '\n' && *p != ',' && *p != ' ' && *p != '('){
+        if (*p == '%'){
+            start = p;
+        }
+
+        p++;
+    }
+
+    len = (start != NULL) ? p - start : 0;
+    return start;
+}
+
+const char * func_machine(const char *p, long &len){
+
+    const char * start = NULL;
+    len = 0;
+
+    for (; *p != '@' && *p != '\n'; ++p){}
+
+    while (*p != '('){
+        if (*p == '@'){
+            start = p;
+        }
+
+        p++;
+    }
+
+    len = (start != NULL) ? p - start : 0;
+    return start;
+}
 
 /*
  * Other methods
@@ -300,7 +367,8 @@ void compute_use_def_instr(const char *line,
     size_t instr_idx, *sz_use, *sz_def, phi_idx;
     short *num_pred;
     int *predecessors;
-    const char *eq, *rhs, *lhs, *txt_end, *token, *callcheck, *virt_reg, *bl_label;
+    long tok_len;
+    const char *eq, *rhs, *lhs, *token, *callcheck;
     Instruct *instr;
     Phi *phis;
 
@@ -347,11 +415,12 @@ void compute_use_def_instr(const char *line,
     rhs = eq == NULL ? line : eq + 1;
     lhs = eq == NULL ? line : eq - 1;
 
-    std::regex re("(%[A-Za-z0-9._]+)");
-    std::regex phi_pair_re(R"(\[\s*([^,\]]+)\s*,\s*([^]\]]+)\])");
+    token = line;
 
-    txt_end = rhs + strlen(rhs);
+    token = reg_machine(token,tok_len);
+    for (; token != NULL && token < lhs; token = reg_machine(++token,tok_len)){
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
     std::cregex_iterator begin_rhs(rhs,txt_end,(is_phi ? phi_pair_re : re));
@@ -373,6 +442,10 @@ void compute_use_def_instr(const char *line,
 
         snprintf(block->instrcts[instr_idx].def[*sz_def], m[0].length() + 1,"%.*s",(int)m[0].length(),token);
         std::string map_token(block->instrcts[instr_idx].def[*sz_def],m[0].length());
+=======
+        snprintf(block->instrcts[instr_idx].def[*sz_def], tok_len + 1,"%.*s",(int)tok_len,token);
+        std::string map_token(block->instrcts[instr_idx].def[*sz_def],tok_len);
+>>>>>>> 953ac0d (did some stuff)
 
         if (regMap.find(map_token) == regMap.end()){
             regMap[map_token] = reg_idx;
@@ -383,6 +456,7 @@ void compute_use_def_instr(const char *line,
         (*sz_def)++;
     }
 
+    token = rhs;
     if (is_phi){
 
 <<<<<<< HEAD
@@ -393,6 +467,7 @@ void compute_use_def_instr(const char *line,
         predecessors = phis->predecessors;
         *num_pred = 0;
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 =======
 >>>>>>> 0a73154 (undoing ethans stupidity)
@@ -408,12 +483,19 @@ void compute_use_def_instr(const char *line,
              *  I'm not sure if this logic is right
              */
             if (virt_reg[0] != '%'){
+=======
+        token = phi_machine(token,tok_len);
+        for (; token != NULL; token = phi_machine(++token,tok_len)){
+            if (token[0] != '%'){
+>>>>>>> 953ac0d (did some stuff)
                 continue;
             }
 
-            snprintf(phis->use[*num_pred], m[1].length() + 1,"%.*s",(int)m[1].length(),virt_reg);
+            snprintf(phis->use[*num_pred], tok_len + 1,"%.*s",(int)tok_len,token);
 
-            predecessors[*num_pred] = atoi(bl_label);
+            phi_machine(token,tok_len);
+
+            predecessors[*num_pred] = atoi(token);
 
             (*num_pred)++;
         }
@@ -422,12 +504,10 @@ void compute_use_def_instr(const char *line,
 
     } else {
 
-        for(std::cregex_iterator it = begin_rhs; it != end; ++it){
-            const std::cmatch &m = *it;
-            token = m[0].first;
-
-            snprintf(block->instrcts[instr_idx].use[*sz_use], m[0].length() + 1,"%.*s",(int)m[0].length(),token);
-            std::string map_token(block->instrcts[instr_idx].use[*sz_use],m[0].length());
+        token = reg_machine(token,tok_len);
+        for (; token != NULL; token = reg_machine(++token,tok_len)){
+            snprintf(block->instrcts[instr_idx].use[*sz_use], tok_len + 1,"%.*s",(int)tok_len,token);
+            std::string map_token(block->instrcts[instr_idx].use[*sz_use],tok_len);
 
             if (regMap.find(map_token) == regMap.end()){
                 regMap[map_token] = reg_idx;
@@ -437,7 +517,6 @@ void compute_use_def_instr(const char *line,
 
             (*sz_use)++;
         }
-
 
     }
 
@@ -449,7 +528,7 @@ void compute_successors(const char *line,
                         Register_mapping &regMap,
                         int &reg_idx){
 
-    const char *txt_end, *p;
+    const char *p;
     size_t instr_idx;
 
     instr_idx = block->num_instr - 1;
@@ -458,25 +537,34 @@ void compute_successors(const char *line,
 
     // First separate out the sub-instructions in the branch line
 
-    std::regex re("(%[A-Za-z0-9._]+)");
-    txt_end = line + strlen(line);
+    char token[256];
 
-    std::cregex_iterator it(line,txt_end,re);
-    std::cregex_iterator end;
+    block->succ_len = 0;
 
-    block->successors = (int*)malloc(it->size() * sizeof(int));
-    block->succ_len = it->size();
+    long tok_len = 0;
+    const char * tok_ptr = line;
+    tok_ptr = reg_machine(tok_ptr, tok_len);
 
-    for (; it != end; ++it){
+    for (; tok_ptr != NULL; reg_machine(++tok_ptr, tok_len))
+    {
+        block->succ_len++;
+    }
 
-        const std::cmatch &m = *it;
-        p = m[0].first;
+    block->successors = (int*)malloc(block->succ_len * sizeof(int));
+
+    tok_ptr = line;
+    tok_ptr = reg_machine(tok_ptr, tok_len);
+
+    for (; tok_ptr != NULL; tok_ptr = reg_machine(++tok_ptr, tok_len)){
+
+        snprintf(token, tok_len, "%s", tok_ptr);
+        p = token;
 
         /* I'm assuming it will always be "label %{register}",
          * so walk back 6 steps and check for "label " */
 
-        if (p - 6 >= line){
-            if (strncmp(p - 6,"label ",6) == 0) {
+        if (tok_ptr - 6 >= line){
+            if (strncmp(tok_ptr - 6,"label ",6) == 0) {
                 block->successors[block->num_succ] = atoi(p + 1);
                 block->num_succ++;
             }
@@ -494,7 +582,6 @@ void compute_successors(const char *line,
             strcpy(block->instrcts[instr_idx].use[sz - 1],p);
 
         }
-
     }
 }
 
@@ -990,18 +1077,27 @@ void analyze_registers(FILE *fp, char fl_name[], int file_size, int recursive){
     new (&block_map.funcs[block_map.func_size]) Function();
     new (&block_map.regs[block_map.func_size]) Register_mapping();
 
-    std::regex re("(@[A-Za-z0-9._]+)");
-    std::regex re_find_start("(%[A-Za-z0-9._]+)");
-    std::cmatch match_out;
-
     while (getline(&line, &len, fp) != -1) {
         if (!in_func){
             if (strncmp(line,"define",6) == 0) {
                 in_func = TRUE_;
-                block_idx = std::distance(std::cregex_iterator(line,line + strlen(line),re_find_start),std::cregex_iterator());
+                const char * func_tok_ptr = line;
+                long func_tok_len = 0;
+                func_tok_ptr = func_machine(func_tok_ptr, func_tok_len);
+
+                const char * reg_tok_ptr = line;
+                long reg_tok_len = 0;
+                reg_tok_ptr = reg_machine(reg_tok_ptr, reg_tok_len);
+                int num_args = 0;
+                for (; reg_tok_ptr != NULL; reg_tok_ptr = reg_machine(++reg_tok_ptr, reg_tok_len))
+                {
+                    num_args++;
+                }
+
+                block_idx = num_args;
                 in_block = TRUE_;
 
-                if (!std::regex_search(line,match_out,re)) {
+                if (func_tok_ptr == NULL) {
                     fprintf(stderr,"Could not compute name of function you entered. How did you get here?\n");
                     exit(EXIT_FAILURE);
                 }
@@ -1012,14 +1108,14 @@ void analyze_registers(FILE *fp, char fl_name[], int file_size, int recursive){
                 if (recursive)
                     snprintf(nameptr, PATH_MAX,
                              "%.*s",
-                             (int)match_out[0].length() - 1,
-                             match_out[0].first + 1);
+                             (int) func_tok_len - 1,
+                             func_tok_ptr + 1);
                 else
                     snprintf(nameptr, PATH_MAX,
                          "%s_%.*s.txt",                        // {file}_{function}.txt
                          fl_name,
-                         (int)match_out[0].length() - 1,
-                         match_out[0].first + 1);
+                         (int) func_tok_len - 1,
+                         func_tok_ptr + 1);
 
 
             } else { continue; }
