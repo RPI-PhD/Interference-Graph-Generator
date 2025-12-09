@@ -306,11 +306,6 @@ void compute_use_def_instr(const char *line,
     sz_def = &instr->size_def;
     sz_use = &instr->size_use;
 
-    if (phi_idx != 0){
-        num_pred = &phis->num_pred;
-        predecessors = phis->predecessors;
-    }
-
     callcheck = strstr(line, "call ");
 
     if (callcheck == NULL)
@@ -339,8 +334,8 @@ void compute_use_def_instr(const char *line,
 
     txt_end = rhs + strlen(rhs);
 
-    std::cregex_iterator begin_rhs(rhs,txt_end,re);
-    std::cregex_iterator begin_lhs(line,lhs,(is_phi ? phi_pair_re : re));
+    std::cregex_iterator begin_rhs(rhs,txt_end,(is_phi ? phi_pair_re : re));
+    std::cregex_iterator begin_lhs(line,lhs,re);
 
     std::cregex_iterator end;
 
@@ -361,6 +356,10 @@ void compute_use_def_instr(const char *line,
     }
 
     if (is_phi){
+
+        num_pred = &phis->num_pred;
+        predecessors = phis->predecessors;
+        *num_pred = 0;
 
         for(std::cregex_iterator it = begin_rhs; it != end; ++it){
             const std::cmatch &m = *it;
