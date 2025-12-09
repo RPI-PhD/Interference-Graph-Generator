@@ -216,7 +216,6 @@ const char * reg_machine(const char *p, long &len)
     const char * start = NULL;
     len = 0;
 
-    printf("searching str: %s\n", p);
     for (; *p != '%' && *p != '\n'; ++p){}
 
     while (*p != '\n' && *p != ',' && *p != ' ' && *p != '('){
@@ -318,11 +317,12 @@ void compute_use_def_block(Function &blocks,Register_mapping &regMap, int num_re
     int reg_ID, jmp;
     size_t reg, i;
 
-    Block *pred_block;
-
     for (std::pair<const size_t,Block> &block : blocks){
 
         Block *bl = &block.second;
+
+        std::cout << bl->label << std::endl;
+
         init_bits(&bl->use_block,num_regs);
         init_bits(&bl->def_block,num_regs);
 
@@ -344,7 +344,21 @@ void compute_use_def_block(Function &blocks,Register_mapping &regMap, int num_re
 
         }
 
+    }
+}
+
+void compute_use_def_block_phis(Function &blocks,Register_mapping &regMap){
+    int reg_ID, jmp;
+    size_t i;
+
+    Block *pred_block;
+
+    for (std::pair<const size_t,Block> &block : blocks){
+
+        Block *bl = &block.second;
+
         for (i = 0; i < bl->num_Phi; ++i){
+
             Phi phi = bl->phis[i];
 
             for (jmp = 0; jmp < phi.num_pred; ++jmp){
@@ -485,22 +499,28 @@ void compute_use_def_instr(const char *line,
             if (virt_reg[0] != '%'){
 =======
         token = phi_machine(token,tok_len);
-        for (; token != NULL; token = phi_machine(++token,tok_len)){
+        for (; token != NULL; token = phi_machine(token,tok_len)){
             if (token[0] != '%'){
+<<<<<<< HEAD
 >>>>>>> 953ac0d (did some stuff)
+=======
+                token = phi_machine(token,tok_len);
+>>>>>>> 995a8b4 (Working on debugging)
                 continue;
             }
 
             snprintf(phis->use[*num_pred], tok_len + 1,"%.*s",(int)tok_len,token);
 
-            phi_machine(token,tok_len);
+            token = phi_machine(token,tok_len);
 
-            predecessors[*num_pred] = atoi(token);
+            predecessors[*num_pred] = atoi(token + 1);
 
             (*num_pred)++;
         }
 
-        block->num_Phi++;
+        if (*num_pred != 0){
+            block->num_Phi++;
+        }
 
     } else {
 
@@ -545,7 +565,7 @@ void compute_successors(const char *line,
     const char * tok_ptr = line;
     tok_ptr = reg_machine(tok_ptr, tok_len);
 
-    for (; tok_ptr != NULL; reg_machine(++tok_ptr, tok_len))
+    for (; tok_ptr != NULL; tok_ptr = reg_machine(++tok_ptr, tok_len))
     {
         block->succ_len++;
     }
@@ -557,7 +577,7 @@ void compute_successors(const char *line,
 
     for (; tok_ptr != NULL; tok_ptr = reg_machine(++tok_ptr, tok_len)){
 
-        snprintf(token, tok_len, "%s", tok_ptr);
+        snprintf(token, tok_len + 1, "%s", tok_ptr);
         p = token;
 
         /* I'm assuming it will always be "label %{register}",
@@ -1141,6 +1161,8 @@ void analyze_registers(FILE *fp, char fl_name[], int file_size, int recursive){
 
             /* Core liveness tracking. All this will have to change for multiple funcs */
             compute_use_def_block(block_map.funcs[block_map.func_size],block_map.regs[block_map.func_size], reg_idx);
+            compute_use_def_block_phis(block_map.funcs[block_map.func_size],block_map.regs[block_map.func_size]);
+
             compute_in_out(block_map.funcs[block_map.func_size], reg_idx);
 
             /* Here we make the edge list given we have populated all necessary structures */
