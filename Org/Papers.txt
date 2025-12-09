@@ -1,0 +1,29 @@
+This is a definitive list of good and useful papers for the project. All papers that legitimately add to our body of knowledge should go here. This is the one spot for our papers
+
+Deep Learning-based Hybrid Graph-Coloring Algorithm for Register Allocation:
+	https://arxiv.org/pdf/1912.03700
+
+A deep learning guided memetic framework for graph coloring problems:
+	https://arxiv.org/pdf/2109.05948
+
+Interference Graph Dataset for Machine Learning-Based Register Allocation:
+	https://ieeexplore.ieee.org/abstract/document/10720063 
+
+Rethinking Graph Neural Networks for the Graph Coloring Problem:
+	https://arxiv.org/pdf/2208.06975
+
+REGISTER ALLOCATION & SPILLING VIA GRAPH COLORING:
+	https://web.eecs.umich.edu/~mahlke/courses/583f12/reading/chaitin82.pdf
+
+Instruction Scheduling and Register Allocation on ARM Cortex-M:
+	https://ko.stoffelen.nl/papers/speedb2016-armscheduler.pdf
+
+Graph Coloring with Physics-Inspired Graph Neural Networks:
+	https://arxiv.org/pdf/2202.01606
+
+Graph Coloring on the GPU:
+	https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=8778394
+
+A Survey on Register Allocation:
+	http://compilers.cs.ucla.edu/fernando/publications/drafts/survey.pdf
+

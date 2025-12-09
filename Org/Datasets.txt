@@ -1,0 +1,15 @@
+This is a definitive list of good and useful datasets for the project. All datasets that legitimately add to our body of knowledge should go here. This is the one spot for our datasets.
+
+Interference Graph Dataset for Machine Learning-Based Register Allocation:
+	https://ieee-dataport.org/documents/rigset-uel-register-interference-graphs-dataset#files 
+
+Labeled graph datasets: 
+	https://mat.tepper.cmu.edu/COLOR/instances.html#XXDSJ
+	https://mat.tepper.cmu.edu/COLOR02/
+
+Model Jupyter Example: 
+	https://github.com/amazon-science/gcp-with-gnns-example
+
+Random C/CPP code dataset:
+	https://www.kaggle.com/datasets/zavadskyy/lots-of-code
+

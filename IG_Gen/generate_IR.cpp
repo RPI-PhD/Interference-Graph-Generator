@@ -175,6 +175,13 @@ static inline int bit_is_active(bitReg *regs, int regnum){
 static inline void clear_bits(bitReg *regs){
     memset(regs->bits,0,regs->reglines * sizeof(BITSIZE));
 }
+/*
+ * String search state machines
+ */
+
+void phi_machine(const char *p){}
+void reg_machine(const char *p){}
+void func_machine(const char *p){}
 
 /*
  * Other methods
