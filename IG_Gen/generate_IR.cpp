@@ -1076,7 +1076,7 @@ int main(int argc, char **argv){
 =======
 >>>>>>> 0a73154 (undoing ethans stupidity)
 
-    printf("\n\nOUTPUT FILE: %s\n\n", graph_file_ttl);
+    printf("\n\nOUTPUT FILE: %s\n\n.txt", graph_file_ttl);
 
     analyze_registers(fp,graph_file_ttl ,size, 1);
 

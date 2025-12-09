@@ -2,13 +2,18 @@
 TIMEOUT_SECONDS=30
 
 GEN_EXE="$1"
+<<<<<<< HEAD
 GEN_EXE="$1"
 IR_FILES=("$@")
+=======
+shift
+
+>>>>>>> 72de1ec (Fixed makefile)
 gen_count=$#
 fail_count=0
 failed_gens=""
 
-for ir_file in "${IR_FILES[@]}"
+for ir_file in "$@"
 do
 
   abs_ir_file=$(realpath "$ir_file")
@@ -33,7 +38,7 @@ do
 	echo "${ir_file} runtime: ${time_taken_in_ms} ms"
 done
 
-echo "${fail_count} out of ${gen_count} tests failed."
+echo "${fail_count} out of ${gen_count} files failed."
 
 if [ ${fail_count} -gt 0 ]
 then
