@@ -71,6 +71,8 @@ typedef struct {
     Instruct *instrcts;
     Phi *phis;
 
+    int test_count;
+
 } Block;  // TODO: This became really big and should probably be broken into multiple structs (bitstruct, successor struct, etc)
 
 typedef struct
@@ -457,6 +459,10 @@ void compute_successors(const char *line,
     std::cregex_iterator it(line,txt_end,re);
     std::cregex_iterator end;
 
+    if (block->test_count > 1){
+        fprintf(stderr,"OH NOOOOO %d\n",block->test_count);
+    }
+
     block->successors = (int*)malloc(it->size() * sizeof(int));
     block->succ_len = it->size();
 
@@ -559,6 +565,7 @@ LINE_TYPE set_up_blocks(const char *line, Function &blocks,
      * Went with a hash table instead of tree just cuz (would've done tree if still in C)
      */
     if (strncmp(line,"  br", 4) == 0){
+        block->test_count++;
         compute_successors(line,block,regMap,reg_idx);
         return LINE_TYPE::BRANCH;
     }
@@ -954,7 +961,7 @@ void generate_all_edge_lists(IRFuncs &funcs, char* fl_name, int recursive)
  */
 void analyze_registers(FILE *fp, char fl_name[], int file_size, int recursive){
 
-    size_t len = 0, block_idx = 2, line_idx = 0;
+    size_t len = 0, block_idx = 0, line_idx = 0;
     int reg_idx = 0;
     char *line = NULL;
     int in_func = FALSE_, in_block = FALSE_;
@@ -971,13 +978,15 @@ void analyze_registers(FILE *fp, char fl_name[], int file_size, int recursive){
     new (&block_map.regs[block_map.func_size]) Register_mapping();
 
     std::regex re("(@[A-Za-z0-9._]+)");
+    std::regex re_find_start("(%[A-Za-z0-9._]+)");
+
     std::cmatch match_out;
 
     while (getline(&line, &len, fp) != -1) {
         if (!in_func){
             if (strncmp(line,"define",6) == 0) {
                 in_func = TRUE_;
-                block_idx = 2;
+                block_idx = std::distance(std::cregex_iterator(line,line + strlen(line),re_find_start),std::cregex_iterator());
                 in_block = TRUE_;
 
                 if (!std::regex_search(line,match_out,re)) {
