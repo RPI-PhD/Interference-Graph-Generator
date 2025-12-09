@@ -18,7 +18,7 @@ GEN_EXE = ./$(TARGET)
 OBJS = $(GEN_SRC:.cpp=.o)
 
 all: run
-.PHONY: clean run genfiles clean_full
+.PHONY: clean run genfiles clean_full dirs
 
 # Rule to link object files into the target executable
 $(TARGET): $(OBJS)
@@ -28,12 +28,15 @@ $(TARGET): $(OBJS)
 %.o: %.cpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-run: $(TARGET) genfiles
+run: dirs $(TARGET) genfiles
 	/bin/bash run_generator.sh "$(GEN_EXE)" $(IR_FILES)
 
 # Generate all the ir files from the data
 genfiles:
 	/bin/bash compile_to_ir.sh $(INP_FILES)
+
+dirs:
+	mkdir -p $(IR_DIR) $(OUT_DIR)
 
 # Clean rule to remove generated files
 clean:

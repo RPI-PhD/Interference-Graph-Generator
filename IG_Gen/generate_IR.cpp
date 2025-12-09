@@ -307,6 +307,7 @@ void compute_use_def_instr(const char *line,
     sz_use = &instr->size_use;
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
     if (phi_idx != 0){
         num_pred = &phis->num_pred;
@@ -314,6 +315,8 @@ void compute_use_def_instr(const char *line,
     }
 
 >>>>>>> 0a73154 (undoing ethans stupidity)
+=======
+>>>>>>> c5885aa (Haven nuked the repo and new we have to do a rollback)
     callcheck = strstr(line, "call ");
 
     if (callcheck == NULL)
@@ -343,12 +346,17 @@ void compute_use_def_instr(const char *line,
     txt_end = rhs + strlen(rhs);
 
 <<<<<<< HEAD
+<<<<<<< HEAD
     std::cregex_iterator begin_rhs(rhs,txt_end,(is_phi ? phi_pair_re : re));
     std::cregex_iterator begin_lhs(line,lhs,re);
 =======
     std::cregex_iterator begin_rhs(rhs,txt_end,re);
     std::cregex_iterator begin_lhs(line,lhs,(is_phi ? phi_pair_re : re));
 >>>>>>> 0a73154 (undoing ethans stupidity)
+=======
+    std::cregex_iterator begin_rhs(rhs,txt_end,(is_phi ? phi_pair_re : re));
+    std::cregex_iterator begin_lhs(line,lhs,re);
+>>>>>>> c5885aa (Haven nuked the repo and new we have to do a rollback)
 
     std::cregex_iterator end;
 
@@ -371,12 +379,18 @@ void compute_use_def_instr(const char *line,
     if (is_phi){
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> c5885aa (Haven nuked the repo and new we have to do a rollback)
         num_pred = &phis->num_pred;
         predecessors = phis->predecessors;
         *num_pred = 0;
 
+<<<<<<< HEAD
 =======
 >>>>>>> 0a73154 (undoing ethans stupidity)
+=======
+>>>>>>> c5885aa (Haven nuked the repo and new we have to do a rollback)
         for(std::cregex_iterator it = begin_rhs; it != end; ++it){
             const std::cmatch &m = *it;
             virt_reg = m[1].first;
