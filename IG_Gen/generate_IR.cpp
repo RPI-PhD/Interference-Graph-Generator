@@ -306,6 +306,14 @@ void compute_use_def_instr(const char *line,
     sz_def = &instr->size_def;
     sz_use = &instr->size_use;
 
+<<<<<<< HEAD
+=======
+    if (phi_idx != 0){
+        num_pred = &phis->num_pred;
+        predecessors = phis->predecessors;
+    }
+
+>>>>>>> 0a73154 (undoing ethans stupidity)
     callcheck = strstr(line, "call ");
 
     if (callcheck == NULL)
@@ -334,8 +342,13 @@ void compute_use_def_instr(const char *line,
 
     txt_end = rhs + strlen(rhs);
 
+<<<<<<< HEAD
     std::cregex_iterator begin_rhs(rhs,txt_end,(is_phi ? phi_pair_re : re));
     std::cregex_iterator begin_lhs(line,lhs,re);
+=======
+    std::cregex_iterator begin_rhs(rhs,txt_end,re);
+    std::cregex_iterator begin_lhs(line,lhs,(is_phi ? phi_pair_re : re));
+>>>>>>> 0a73154 (undoing ethans stupidity)
 
     std::cregex_iterator end;
 
@@ -357,10 +370,13 @@ void compute_use_def_instr(const char *line,
 
     if (is_phi){
 
+<<<<<<< HEAD
         num_pred = &phis->num_pred;
         predecessors = phis->predecessors;
         *num_pred = 0;
 
+=======
+>>>>>>> 0a73154 (undoing ethans stupidity)
         for(std::cregex_iterator it = begin_rhs; it != end; ++it){
             const std::cmatch &m = *it;
             virt_reg = m[1].first;
@@ -789,6 +805,7 @@ void recursively_populate(Edge_list_funcs * el_list, int func_idx, int * vidx_of
     rhs->cur_depth--;
 }
 
+<<<<<<< HEAD
 void cleanup(Edge_list_funcs * el_list, Recursion_helper_stack * rhs, int numfuncs)
 {
     for (int i = 0; i < numfuncs; i++)
@@ -808,6 +825,11 @@ void cleanup(Edge_list_funcs * el_list, Recursion_helper_stack * rhs, int numfun
 void generate_all_edge_lists(IRFuncs &funcs, char* fl_name, int recursive)
 {
     FILE* fp = NULL;
+=======
+void generate_all_edge_lists(IRFuncs &funcs, char* fl_name, int recursive)
+{
+    FILE* fp;
+>>>>>>> 0a73154 (undoing ethans stupidity)
     Edge_list_funcs * el = (Edge_list_funcs*) malloc(sizeof(Edge_list_funcs) * funcs.func_size);
     int main_idx = -1;
     size_t i;
@@ -832,6 +854,7 @@ void generate_all_edge_lists(IRFuncs &funcs, char* fl_name, int recursive)
         generate_edge_list(funcs.funcs[i], funcs.regs[i], fp, el + i);
         if (!recursive) fclose(fp);
     }
+<<<<<<< HEAD
     if (fp == NULL)
     {
         strcat(fl_name, ".txt");
@@ -840,15 +863,26 @@ void generate_all_edge_lists(IRFuncs &funcs, char* fl_name, int recursive)
         return;
     }
     Recursion_helper_stack * rhs = (Recursion_helper_stack *) malloc(sizeof(Recursion_helper_stack));
+=======
+>>>>>>> 0a73154 (undoing ethans stupidity)
     if (recursive)
     {
         fprintf(fp, "\nFULL GRAPH:\n\n");
         int idx_offset = 0;
+<<<<<<< HEAD
         init_rhs(rhs);
         recursively_populate(el, main_idx, &idx_offset, funcs.func_size, rhs, fp);
         fclose(fp);
     }
     cleanup(el, rhs, funcs.func_size);
+=======
+        Recursion_helper_stack rhs;
+        init_rhs(&rhs);
+        recursively_populate(el, main_idx, &idx_offset, funcs.func_size, &rhs, fp);
+        fclose(fp);
+    }
+
+>>>>>>> 0a73154 (undoing ethans stupidity)
 }
 
 /*
@@ -945,9 +979,12 @@ void analyze_registers(FILE *fp, char fl_name[], int file_size, int recursive){
     fclose(fp);
     if (line)
         free(line);
+<<<<<<< HEAD
     free(block_map.func_names);
     free(block_map.funcs);
     free(block_map.regs);
+=======
+>>>>>>> 0a73154 (undoing ethans stupidity)
 
 
 
@@ -994,7 +1031,10 @@ int main(int argc, char **argv){
     graph_file_ttl[pathname_len] = '\0';
     strcat(graph_file_ttl,"/output_graph/");
     strncat(graph_file_ttl,last+1,size_noll);
+<<<<<<< HEAD
     printf("\n\nPROCESSING FILE: %s\n\n", graph_file_ttl);
+=======
+>>>>>>> 0a73154 (undoing ethans stupidity)
 
     analyze_registers(fp,graph_file_ttl ,size, 1);
 
