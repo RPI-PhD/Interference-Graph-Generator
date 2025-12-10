@@ -573,7 +573,7 @@ void compute_successors(char *line,
 
     if (old_succ_len != block->succ_len){
 
-        block->successors = (int *) realloc(block->successors,block->succ_len);
+        block->successors = (int *) realloc(block->successors,block->succ_len * sizeof(int));
 
         if (block->successors == NULL){
             fprintf(stderr,"Realloc of block->successors failed\n");
@@ -609,8 +609,8 @@ void compute_successors(char *line,
             strcpy(block->instrcts[instr_idx].use[sz - 1],p);
 
         }
-
     }
+    block->num_succ = original_num_succ;
 }
 
 // Note to self: Function will be on the stack...only need 1
