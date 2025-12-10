@@ -945,7 +945,7 @@ void recursively_populate(Edge_list_funcs * el_list, int func_idx, int * vidx_of
     }
     // step 2: deal with parents interferences
     *vidx_offset += el_list[func_idx].num_verts;
-    for (int k = 0; k < rhs->cur_depth+1; k++) fprintf(fp, "\t");
+    // for (int k = 0; k < rhs->cur_depth+1; k++) fprintf(fp, "\t");
     // fprintf(fp, "FUNC CALL %s REC DEPTH %d MYOFFSET %d STEP 2 (parental interference):\n", el_list[func_idx].func_name, rhs->cur_depth+1, myoffset);
     //for each u in func neighbors of entire parent call chain
     for (int stackidx = 0; stackidx < rhs->cur_depth+1; stackidx++)
