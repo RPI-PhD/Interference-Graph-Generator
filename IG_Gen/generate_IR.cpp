@@ -276,7 +276,7 @@ void copy_EL(Edge_list_funcs * dst, Edge_list_funcs * src)
     dst->num_verts = src->num_verts;
     dst->alloc_size = src->alloc_size;
     dst->edges = (int *)malloc(sizeof(int) * dst->alloc_size);
-    memcpy(dst->edges, src->edges, sizeof(int) * dst->num_edges);
+    memcpy(dst->edges, src->edges, sizeof(int) * dst->num_edges * 2);
     dst->num_funcs = 0;
     dst->func_alloc = 2;
     dst->calls = (Func_vertex *)malloc(sizeof(Func_vertex) * dst->func_alloc);
