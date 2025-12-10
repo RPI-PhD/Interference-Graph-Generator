@@ -3,10 +3,10 @@ project(DLOG-Project)
 
 set(CMAKE_CXX_STANDARD 17)
 
-#set(CMAKE_CXX_FLAGS -fsanitize=address)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 -g -fno-omit-frame-pointer")
 
 add_executable(DLOG-Project
-        generate_IR.cpp
-        code_data/test2.c
-        code_data/parser.c
-        code_data/myshell_parser.h)
+        IG_Gen/generate_IR.cpp
+        IG_Gen/code_data/test2.c
+        IG_Gen/code_data/parser.c
+        IG_Gen/code_data/myshell_parser.h)

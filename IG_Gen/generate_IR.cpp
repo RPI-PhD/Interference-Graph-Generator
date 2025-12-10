@@ -86,9 +86,10 @@ typedef struct
     int num_verts;
     int num_edges;
     int alloc_size;
-    int *edges; // n = src, n+1 = dst
+    int * edges; // n = src, n+1 = dst
     int num_funcs;
     int func_alloc;
+    int recursed; // flag
     Func_vertex *calls;
 } Edge_list_funcs;
 
@@ -264,6 +265,21 @@ void init_EL(Edge_list_funcs * el, char * name)
     el->num_funcs = 0;
     el->func_alloc = 2;
     el->calls = (Func_vertex *)malloc(sizeof(Func_vertex) * el->func_alloc);
+    el->recursed = 0;
+}
+
+void copy_EL(Edge_list_funcs * dst, Edge_list_funcs * src)
+{
+    dst->func_name = (char*) malloc(strlen(src->func_name) + 1);
+    strcpy(dst->func_name, src->func_name);
+    dst->num_edges = src->num_edges;
+    dst->num_verts = src->num_verts;
+    dst->alloc_size = src->alloc_size;
+    dst->edges = (int *)malloc(sizeof(int) * dst->alloc_size);
+    memcpy(dst->edges, src->edges, sizeof(int) * dst->num_edges);
+    dst->num_funcs = 0;
+    dst->func_alloc = 2;
+    dst->calls = (Func_vertex *)malloc(sizeof(Func_vertex) * dst->func_alloc);
 }
 
 void add_edge(Edge_list_funcs * el, int u, int v)
@@ -871,23 +887,19 @@ void generate_edge_list(Function &blocks,
 
                 for (r = 0; r < num_regs; ++r){
                     if(bit_is_active(&Live,r) && r != regnum_d){
-                        fprintf(fp, "e %d %d\n", r, regnum_d);
                         add_edge(el, r, regnum_d);
                     }
                 }
 
                 if (I.func_name != nullptr)
                 {
-                    fprintf(fp, "%s", I.func_name);
 
                     int count = 0;
                     for (r = 0; r < num_regs; ++r){
                         if(bit_is_active(&Live,r) && r != regnum_d){
-                            fprintf(fp, " %d", r);
                             count++;
                         }
                     }
-                    fprintf(fp, "\n");
                     add_func(el, I.func_name, count);
                     int idx = 0;
                     for (r = 0; r < num_regs; ++r){
@@ -931,22 +943,22 @@ int find_func(Edge_list_funcs * el_list, char* query, int num_funcs)
     return -1;
 }
 
-void recursively_populate(Edge_list_funcs * el_list, int func_idx, int * vidx_offset, int num_funcs,
-    Recursion_helper_stack * rhs, FILE* fp)
+void recursively_populate(Edge_list_funcs * el_list, Edge_list_funcs * el, int func_idx,
+    int * vidx_offset, int num_funcs, Recursion_helper_stack * rhs, FILE* fp)
 {
     int myoffset = *vidx_offset;
     // step 1: print current funcs edges
-    // for (int k = 0; k < rhs->cur_depth+1; k++) fprintf(fp, "\t");
-    // fprintf(fp, "FUNC CALL %s REC DEPTH %d MYOFFSET %d STEP 1 (basic edge list):\n", el_list[func_idx].func_name, rhs->cur_depth+1, myoffset);
     for (int i = 0; i < el_list[func_idx].num_edges; i++)
     {
-        // for (int k = 0; k < rhs->cur_depth+1; k++) fprintf(fp, "\t");
-        fprintf(fp, "e %d %d\n", el_list[func_idx].edges[i*2]+myoffset, el_list[func_idx].edges[i*2+1]+myoffset);
+        int u = el_list[func_idx].edges[i*2]+myoffset;
+        int v = el_list[func_idx].edges[i*2+1]+myoffset;
+        if (rhs->cur_depth != -1)
+        {
+            add_edge(el, u, v);
+        }
     }
     // step 2: deal with parents interferences
     *vidx_offset += el_list[func_idx].num_verts;
-    // for (int k = 0; k < rhs->cur_depth+1; k++) fprintf(fp, "\t");
-    // fprintf(fp, "FUNC CALL %s REC DEPTH %d MYOFFSET %d STEP 2 (parental interference):\n", el_list[func_idx].func_name, rhs->cur_depth+1, myoffset);
     //for each u in func neighbors of entire parent call chain
     for (int stackidx = 0; stackidx < rhs->cur_depth+1; stackidx++)
     {
@@ -955,16 +967,12 @@ void recursively_populate(Edge_list_funcs * el_list, int func_idx, int * vidx_of
             int u_offset = rhs->helper[stackidx].neighbors[u] + rhs->helper[stackidx].offset;
             for (int v = myoffset; v < myoffset+el_list[func_idx].num_verts; ++v)
             {
-                // for (int k = 0; k < rhs->cur_depth+1; k++) fprintf(fp, "\t");
-                fprintf(fp, "e %d %d\n", u_offset, v);
+                add_edge(el, u_offset, v);
             }
-
         }
     }
 
     // step 3: iterate through func calls
-    // for (int k = 0; k < rhs->cur_depth+1; k++) fprintf(fp, "\t");
-    // fprintf(fp, "FUNC CALL %s REC DEPTH %d MYOFFSET %d STEP 3 (recursive calls):\n", el_list[func_idx].func_name, rhs->cur_depth+1, myoffset);
     for (int i = 0; i < el_list[func_idx].num_funcs; i++)
     {
         int next = find_func(el_list, el_list[func_idx].calls[i].func_id, num_funcs);
@@ -972,12 +980,10 @@ void recursively_populate(Edge_list_funcs * el_list, int func_idx, int * vidx_of
         if (next == -1)
         {
             // if the function's graph isnt known (i.e. dlls), all we can do is drop the label and its interferences
-            // for (int k = 0; k < rhs->cur_depth+1; k++) fprintf(fp, "\t");
-            fprintf(fp, "%s", el_list[func_idx].calls[i].func_id);
+            add_func(el, el_list[func_idx].calls[i].func_id, el_list[func_idx].calls[i].num_connections);
             for (int j = 0; j < el_list[func_idx].calls[i].num_connections; ++j){
-                fprintf(fp, " %d", el_list[func_idx].calls[i].neighbors[j] + myoffset);
+                el->calls[el->num_funcs-1].neighbors[j] = el_list[func_idx].calls[i].neighbors[j] + myoffset;
             }
-            fprintf(fp, "\n");
         }
         else
         {
@@ -987,7 +993,7 @@ void recursively_populate(Edge_list_funcs * el_list, int func_idx, int * vidx_of
             rs.offset = myoffset;
             rhs_push(rhs, &rs);
 
-            recursively_populate(el_list, next, vidx_offset, num_funcs, rhs, fp);
+            recursively_populate(el_list, el, next, vidx_offset, num_funcs, rhs, fp);
         }
     }
     if (rhs->cur_depth >= 0) rhs->cur_depth--;
@@ -995,8 +1001,31 @@ void recursively_populate(Edge_list_funcs * el_list, int func_idx, int * vidx_of
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 >>>>>>> 955d7f1 (ethan spreads false information and maliciously deletes files on my computer so he can blame it on me)
+=======
+void print_el_to_file(FILE* fp, Edge_list_funcs &el)
+{
+    if (el.recursed) fprintf(fp, "# (Recursed) "); else fprintf(fp, "# ");
+    fprintf(fp, "Function: %s\n# |V| = %d [0, %d]\n# |E| = %d\n# Number of unexpanded functions: %d, listed last\n\n",
+        el.func_name, el.num_verts, el.num_verts-1, el.num_edges, el.num_funcs);
+    for (int i = 0; i < el.num_edges; ++i)
+    {
+        fprintf(fp, "e %d %d\n", el.edges[i*2], el.edges[i*2+1]);
+    }
+    for (int i = 0; i < el.num_funcs; ++i)
+    {
+        fprintf(fp, "%s", el.calls[i].func_id);
+        for (int j = 0; j < el.calls[i].num_connections; ++j){
+            fprintf(fp, " %d", el.calls[i].neighbors[j]);
+        }
+        fprintf(fp, "\n");
+    }
+    fprintf(fp, "\n");
+}
+
+>>>>>>> fc1d6bb (cleaned up output order of operations)
 void cleanup(Edge_list_funcs * el_list, Recursion_helper_stack * rhs, int numfuncs)
 {
     for (int i = 0; i < numfuncs; i++)
@@ -1009,7 +1038,7 @@ void cleanup(Edge_list_funcs * el_list, Recursion_helper_stack * rhs, int numfun
         free(el_list[i].edges);
         free(el_list[i].func_name);
     }
-    free(rhs->helper);
+    if (rhs != NULL) free(rhs->helper);
     free(el_list);
     free(rhs);
 }
@@ -1029,27 +1058,24 @@ void generate_all_edge_lists(IRFuncs &funcs, char* fl_name, int recursive)
     FILE* fp = NULL;
 >>>>>>> 955d7f1 (ethan spreads false information and maliciously deletes files on my computer so he can blame it on me)
     Edge_list_funcs * el = (Edge_list_funcs*) malloc(sizeof(Edge_list_funcs) * funcs.func_size);
-    int main_idx = -1;
-    size_t i;
+    Edge_list_funcs * el_recursed = (Edge_list_funcs*) malloc(sizeof(Edge_list_funcs) * funcs.func_size);
 
-    for (i = 0; i < funcs.func_size; ++i)
+    for (size_t ii = 0; ii < funcs.func_size; ++ii)
     {
-        char * funcname = funcs.func_names + i * PATH_MAX;
-        init_EL(el + i, funcname);
-        (el + i)->num_verts = funcs.regs[i].size();
+        char * funcname = funcs.func_names + ii * PATH_MAX;
+        init_EL(el + ii, funcname);
+        (el + ii)->num_verts = funcs.regs[ii].size();
         if (!recursive)
         {
             fp = create_edgelist_file(funcname);
         }
-        else if (i == 0)
+        else if (ii == 0)
         {
             strcat(fl_name, ".txt");
             fp = create_edgelist_file(fl_name);
-            fprintf(fp, "%s (%ld verts):\n\n", funcname, funcs.regs[i].size());
         }
-        else fprintf(fp, "\n%s (%ld verts):\n\n", funcname, funcs.regs[i].size());
-        if (strcmp(funcname, "main") == 0) main_idx = i;
-        generate_edge_list(funcs.funcs[i], funcs.regs[i], fp, el + i);
+        generate_edge_list(funcs.funcs[ii], funcs.regs[ii], fp, el + ii);
+        print_el_to_file(fp, el[ii]);
         if (!recursive) fclose(fp);
     }
 <<<<<<< HEAD
@@ -1061,6 +1087,7 @@ void generate_all_edge_lists(IRFuncs &funcs, char* fl_name, int recursive)
         strcat(fl_name, ".txt");
         fp = create_edgelist_file(fl_name);
         free(el);
+        free(el_recursed);
         return;
     }
     Recursion_helper_stack * rhs = (Recursion_helper_stack *) malloc(sizeof(Recursion_helper_stack));
@@ -1076,23 +1103,20 @@ void generate_all_edge_lists(IRFuncs &funcs, char* fl_name, int recursive)
 <<<<<<< HEAD
 <<<<<<< HEAD
         init_rhs(rhs);
-        if (main_idx != -1)
+
+        for (int ii = 0; ii < (int)funcs.func_size; ii++)
         {
-            fprintf(fp, "\nFULL GRAPH EXPANDED FROM main:\n\n");
-            recursively_populate(el, main_idx, &idx_offset, funcs.func_size, rhs, fp);
-        }
-        else
-        {
-            for (int ii = 0; ii < (int)funcs.func_size; ii++)
-            {
-                fprintf(fp, "\nFUNCTION SUBGRAPH EXPANDED FROM %s:\n\n", el[ii].func_name);
-                recursively_populate(el, ii, &idx_offset, funcs.func_size, rhs, fp);
-                idx_offset = 0;
-            }
+            copy_EL(&el_recursed[ii], &el[ii]);
+            el_recursed[ii].recursed = 1;
+            recursively_populate(el, &el_recursed[ii], ii, &idx_offset, funcs.func_size, rhs, fp);
+            el_recursed[ii].num_verts = idx_offset;
+            print_el_to_file(fp, el_recursed[ii]);
+            idx_offset = 0;
         }
         fclose(fp);
     }
     cleanup(el, rhs, funcs.func_size);
+<<<<<<< HEAD
 =======
         Recursion_helper_stack rhs;
         init_rhs(&rhs);
@@ -1108,6 +1132,9 @@ void generate_all_edge_lists(IRFuncs &funcs, char* fl_name, int recursive)
     }
     cleanup(el, rhs, funcs.func_size);
 >>>>>>> 955d7f1 (ethan spreads false information and maliciously deletes files on my computer so he can blame it on me)
+=======
+    cleanup(el_recursed, NULL, funcs.func_size);
+>>>>>>> fc1d6bb (cleaned up output order of operations)
 }
 
 /*
