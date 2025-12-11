@@ -86,12 +86,20 @@ typedef struct
     int num_verts;
     int num_edges;
     int alloc_size;
-    int * edges; // n = src, n+1 = dst
+    unsigned int * edges; // n = src, n+1 = dst
     int num_funcs;
     int func_alloc;
     int recursed; // flag
     Func_vertex *calls;
 } Edge_list_funcs;
+
+typedef struct
+{
+    int edges;
+    int verts;
+    int * adjlist;
+    int * offsets;
+} CSR;
 
 typedef struct
 {
@@ -261,7 +269,7 @@ void init_EL(Edge_list_funcs * el, char * name)
     el->num_edges = 0;
     el->num_verts = 0;
     el->alloc_size = 8;
-    el->edges = (int *)malloc(sizeof(int) * el->alloc_size);
+    el->edges = (unsigned int *)malloc(sizeof(unsigned int) * el->alloc_size);
     el->num_funcs = 0;
     el->func_alloc = 2;
     el->calls = (Func_vertex *)malloc(sizeof(Func_vertex) * el->func_alloc);
@@ -275,7 +283,7 @@ void copy_EL(Edge_list_funcs * dst, Edge_list_funcs * src)
     dst->num_edges = src->num_edges;
     dst->num_verts = src->num_verts;
     dst->alloc_size = src->alloc_size;
-    dst->edges = (int *)malloc(sizeof(int) * dst->alloc_size);
+    dst->edges = (unsigned int *)malloc(sizeof(unsigned int) * dst->alloc_size);
     memcpy(dst->edges, src->edges, sizeof(int) * dst->num_edges * 2);
     dst->num_funcs = 0;
     dst->func_alloc = 2;
@@ -287,7 +295,7 @@ void add_edge(Edge_list_funcs * el, int u, int v)
     if (el->num_edges * 2 >= el->alloc_size - 2)
     {
         el->alloc_size = el->alloc_size * 2;
-        el->edges = (int *)realloc(el->edges, sizeof(int) * el->alloc_size);
+        el->edges = (unsigned int *)realloc(el->edges, sizeof(unsigned int) * el->alloc_size);
     }
     el->edges[el->num_edges*2] = u;
     el->edges[el->num_edges*2+1] = v;
@@ -306,6 +314,71 @@ void add_func(Edge_list_funcs * el, char* func_id, int size)
     el->calls[el->num_funcs].num_connections = size;
     el->calls[el->num_funcs].neighbors = (int *)malloc(sizeof(int) * size);
     el->num_funcs++;
+}
+
+void sort_EL_counting(Edge_list_funcs * el, unsigned int * edges)
+{
+    // IMPORTANT: this expects an array of unsigned INTS where [e[n], e[n+1]] represents an edge pair
+    // in order to sort this by src edge then dst edge, it needs to be cast to a long pointer before the call
+
+}
+
+void swap(unsigned long* a, unsigned long* b)
+{
+    int t = *a;
+    *a = *b;
+    *b = t;
+}
+
+int partition(unsigned long arr[], int l, int h)
+{
+    int x = arr[h / 2];
+    int i = (l - 1);
+
+    for (int j = l; j <= h - 1; j++) {
+        if (arr[j] <= x) {
+            i++;
+            swap(&arr[i], &arr[j]);
+        }
+    }
+    swap(&arr[i + 1], &arr[h]);
+    return (i + 1);
+}
+
+void sort_EL_quick(Edge_list_funcs * el, unsigned int * edges)
+{
+    // IMPORTANT: this expects an array of unsigned INTS where [e[n], e[n+1]] represents an edge pair
+    // in order to sort this by src edge then dst edge, it needs to be cast to a long pointer before the call
+    // adapted from g4g https://www.geeksforgeeks.org/dsa/iterative-quick-sort/
+    unsigned long * combined_edges = (unsigned long *) edges;
+    int low = 0;
+    int high = el->num_edges - 1;
+    if (low == high) return;
+    int * stack = (int*)malloc(el->num_edges * sizeof(int));
+    int stack_idx = -1;
+
+    stack[++stack_idx] = low;
+    stack[++stack_idx] = high;
+    while (stack_idx >= 0)
+    {
+        high = stack[stack_idx--];
+        low = stack[stack_idx--];
+        int p = partition(combined_edges, low, high);
+        if (p - 1 > low) {
+            stack[++stack_idx] = low;
+            stack[++stack_idx] = p - 1;
+        }
+        if (p + 1 < high) {
+            stack[++stack_idx] = p + 1;
+            stack[++stack_idx] = high;
+        }
+    }
+    free(stack);
+}
+
+void init_CSR()
+{
+
 }
 
 void init_rhs(Recursion_helper_stack * rhs)
@@ -1110,6 +1183,9 @@ void generate_all_edge_lists(IRFuncs &funcs, char* fl_name, int recursive)
             el_recursed[ii].recursed = 1;
             recursively_populate(el, &el_recursed[ii], ii, &idx_offset, funcs.func_size, rhs, fp);
             el_recursed[ii].num_verts = idx_offset;
+            print_el_to_file(fp, el_recursed[ii]);
+            fprintf(fp, "SORTED TEST\n");
+            sort_EL_quick(&el_recursed[ii], el_recursed[ii].edges);
             print_el_to_file(fp, el_recursed[ii]);
             idx_offset = 0;
         }

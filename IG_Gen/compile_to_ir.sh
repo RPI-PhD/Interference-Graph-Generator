@@ -5,7 +5,7 @@ do
 
   outputllpart="${inp/.c/.ll}"
 
-  outputll="${outputllpart/code_data/LLVM_IR}"
+  outputll="${outputllpart/DATASETv2/LLVM_IR}"
 
   clang -S -emit-llvm -O0 "$inp" -o "$outputll"
 
