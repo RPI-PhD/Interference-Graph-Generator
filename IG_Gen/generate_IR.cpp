@@ -1120,7 +1120,7 @@ int find_func(Edge_list_funcs * el_list, char* query, int num_funcs)
     return -1;
 }
 
-void recursively_populate(Edge_list_funcs * el_list, Edge_list_funcs * el, int func_idx,
+void recursively_populate(Edge_list_funcs * el_list, Edge_list_funcs * el, int prev_idx, int func_idx,
     int * vidx_offset, int num_funcs, Recursion_helper_stack * rhs, FILE* fp)
 {
     int myoffset = *vidx_offset;
@@ -1154,7 +1154,7 @@ void recursively_populate(Edge_list_funcs * el_list, Edge_list_funcs * el, int f
     {
         int next = find_func(el_list, el_list[func_idx].calls[i].func_id, num_funcs);
 
-        if (next == -1)
+        if (next == -1 || func_idx == prev_idx)
         {
             // if the function's graph isnt known (i.e. dlls), all we can do is drop the label and its interferences
             add_func(el, el_list[func_idx].calls[i].func_id, el_list[func_idx].calls[i].num_connections);
@@ -1170,7 +1170,7 @@ void recursively_populate(Edge_list_funcs * el_list, Edge_list_funcs * el, int f
             rs.offset = myoffset;
             rhs_push(rhs, &rs);
 
-            recursively_populate(el_list, el, next, vidx_offset, num_funcs, rhs, fp);
+            recursively_populate(el_list, el, func_idx, next, vidx_offset, num_funcs, rhs, fp);
         }
     }
     if (rhs->cur_depth >= 0) rhs->cur_depth--;
@@ -1292,7 +1292,7 @@ void generate_all_edge_lists(IRFuncs &funcs, char* fl_name, int recursive)
         {
             copy_EL(&el_recursed[ii], &el[ii]);
             el_recursed[ii].recursed = 1;
-            recursively_populate(el, &el_recursed[ii], ii, &idx_offset, funcs.func_size, rhs, fp);
+            recursively_populate(el, &el_recursed[ii], -1 , ii, &idx_offset, funcs.func_size, rhs, fp);
             el_recursed[ii].num_verts = idx_offset;
             // sort_EL_quick(&el_recursed[ii], el_recursed[ii].edges);
             CSR csr;
