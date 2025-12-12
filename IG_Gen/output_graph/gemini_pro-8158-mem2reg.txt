@@ -1,0 +1,165 @@
+# Function: translate
+# |V| = 10 [0, 9]
+# |E| = 34
+# CHI = 6
+# max_degree = 11
+# avg_degree = 6.800000
+# Number of unexpanded functions: 4, listed last
+
+e 0 8
+e 4 8
+e 6 8
+e 0 7
+e 4 7
+e 6 7
+e 8 7
+e 0 6
+e 4 6
+e 8 6
+e 0 5
+e 4 5
+e 6 5
+e 8 5
+e 0 9
+e 4 9
+e 6 9
+e 8 9
+e 0 4
+e 6 4
+e 8 4
+e 0 3
+e 4 3
+e 6 3
+e 8 3
+e 0 2
+e 4 2
+e 6 2
+e 8 2
+e 0 1
+e 2 1
+e 4 1
+e 6 1
+e 8 1
+strcmp 0 4 6 8
+strcmp 0 4 6 8
+strcmp 0 4 6 8
+strcmp 0 2 4 6 8
+
+# Function: main
+# |V| = 7 [0, 6]
+# |E| = 3
+# CHI = 2
+# max_degree = 3
+# avg_degree = 0.857143
+# Number of unexpanded functions: 4, listed last
+
+e 0 3
+e 0 2
+e 0 1
+printf
+translate
+__isoc99_scanf 0
+printf 0
+
+# (Recursed)
+# Function: translate
+# |V| = 10 [0, 9]
+# |E| = 34
+# CHI = 6
+# max_degree = 11
+# avg_degree = 6.800000
+# Number of unexpanded functions: 4, listed last
+
+e 0 8
+e 4 8
+e 6 8
+e 0 7
+e 4 7
+e 6 7
+e 8 7
+e 0 6
+e 4 6
+e 8 6
+e 0 5
+e 4 5
+e 6 5
+e 8 5
+e 0 9
+e 4 9
+e 6 9
+e 8 9
+e 0 4
+e 6 4
+e 8 4
+e 0 3
+e 4 3
+e 6 3
+e 8 3
+e 0 2
+e 4 2
+e 6 2
+e 8 2
+e 0 1
+e 2 1
+e 4 1
+e 6 1
+e 8 1
+strcmp 0 4 6 8
+strcmp 0 4 6 8
+strcmp 0 4 6 8
+strcmp 0 2 4 6 8
+
+# (Recursed)
+# Function: main
+# |V| = 17 [0, 16]
+# |E| = 37
+# CHI = 6
+# max_degree = 11
+# avg_degree = 4.352941
+# Number of unexpanded functions: 7, listed last
+
+e 0 3
+e 0 2
+e 0 1
+e 7 15
+e 11 15
+e 13 15
+e 7 14
+e 11 14
+e 13 14
+e 15 14
+e 7 13
+e 11 13
+e 15 13
+e 7 12
+e 11 12
+e 13 12
+e 15 12
+e 7 16
+e 11 16
+e 13 16
+e 15 16
+e 7 11
+e 13 11
+e 15 11
+e 7 10
+e 11 10
+e 13 10
+e 15 10
+e 7 9
+e 11 9
+e 13 9
+e 15 9
+e 7 8
+e 9 8
+e 11 8
+e 13 8
+e 15 8
+printf
+strcmp 7 11 13 15
+strcmp 7 11 13 15
+strcmp 7 11 13 15
+strcmp 7 9 11 13 15
+__isoc99_scanf 0
+printf 0
+
