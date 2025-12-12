@@ -86,6 +86,9 @@ typedef struct
     int num_verts;
     int num_edges;
     int alloc_size;
+    unsigned int max_degree;
+    float avg_degree;
+    int chi;
     unsigned int * edges; // n = src, n+1 = dst
     int num_funcs;
     int func_alloc;
@@ -97,8 +100,12 @@ typedef struct
 {
     int edges;
     int verts;
-    int * adjlist;
-    int * offsets;
+    unsigned int max_degree;
+    float avg_degree;
+    int chi;
+    unsigned int * adjlist;
+    unsigned int * offsets;
+    unsigned int * colors;
 } CSR;
 
 typedef struct
@@ -258,6 +265,30 @@ const char * func_machine(const char *p, long &len){
     return start;
 }
 
+bool is_aligned(void* ptr, size_t alignment)
+{
+    return ((size_t) ptr) / alignment;
+}
+
+void*
+aligned_realloc_pessimistic(
+    void* ptr, size_t new_size, size_t old_size, size_t alignment)
+{
+    void* aligned = aligned_alloc(alignment, new_size);
+    memcpy(aligned, ptr, old_size);
+    free(ptr);
+    return aligned;
+}
+
+void*
+aligned_realloc_glibc(
+    void* ptr, size_t new_size, size_t alignment, size_t old_size)
+{
+    return old_size >= new_size && is_aligned(ptr, alignment)
+        ? ptr
+        : aligned_realloc_pessimistic(ptr, new_size, old_size, alignment);
+}
+
 /*
  * Other methods
  */
@@ -269,7 +300,7 @@ void init_EL(Edge_list_funcs * el, char * name)
     el->num_edges = 0;
     el->num_verts = 0;
     el->alloc_size = 8;
-    el->edges = (unsigned int *)malloc(sizeof(unsigned int) * el->alloc_size);
+    el->edges = (unsigned int *)aligned_alloc(16, sizeof(unsigned int) * el->alloc_size);
     el->num_funcs = 0;
     el->func_alloc = 2;
     el->calls = (Func_vertex *)malloc(sizeof(Func_vertex) * el->func_alloc);
@@ -283,7 +314,7 @@ void copy_EL(Edge_list_funcs * dst, Edge_list_funcs * src)
     dst->num_edges = src->num_edges;
     dst->num_verts = src->num_verts;
     dst->alloc_size = src->alloc_size;
-    dst->edges = (unsigned int *)malloc(sizeof(unsigned int) * dst->alloc_size);
+    dst->edges = (unsigned int *)aligned_alloc(16, sizeof(unsigned int) * dst->alloc_size);
     memcpy(dst->edges, src->edges, sizeof(int) * dst->num_edges * 2);
     dst->num_funcs = 0;
     dst->func_alloc = 2;
@@ -295,7 +326,8 @@ void add_edge(Edge_list_funcs * el, int u, int v)
     if (el->num_edges * 2 >= el->alloc_size - 2)
     {
         el->alloc_size = el->alloc_size * 2;
-        el->edges = (unsigned int *)realloc(el->edges, sizeof(unsigned int) * el->alloc_size);
+        el->edges = (unsigned int *)aligned_realloc_glibc(el->edges, sizeof(unsigned int) * el->alloc_size,
+            16, sizeof(unsigned int) * el->alloc_size / 2);
     }
     el->edges[el->num_edges*2] = u;
     el->edges[el->num_edges*2+1] = v;
@@ -325,14 +357,14 @@ void sort_EL_counting(Edge_list_funcs * el, unsigned int * edges)
 
 void swap(unsigned long* a, unsigned long* b)
 {
-    int t = *a;
+    unsigned long t = *a;
     *a = *b;
     *b = t;
 }
 
 int partition(unsigned long arr[], int l, int h)
 {
-    int x = arr[h / 2];
+    unsigned long x = arr[h];
     int i = (l - 1);
 
     for (int j = l; j <= h - 1; j++) {
@@ -376,9 +408,73 @@ void sort_EL_quick(Edge_list_funcs * el, unsigned int * edges)
     free(stack);
 }
 
-void init_CSR()
+void init_CSR(CSR * csr, Edge_list_funcs * el)
 {
+    //expects a sorted edgelist
+    csr->edges = el->num_edges;
+    csr->verts = el->num_verts;
+    csr->max_degree = 0;
+    int avg_degree_int = 0;
+    csr->chi = 0;
+    csr->adjlist = (unsigned int *) malloc(sizeof(unsigned int) * el->num_edges * 2);
+    csr->offsets = (unsigned int *) malloc(sizeof(unsigned int) * el->num_verts + 1);
+    csr->colors = (unsigned int *) calloc(el->num_verts, sizeof(unsigned int));
+    unsigned int *deg = (unsigned int *) calloc(csr->verts, sizeof(unsigned int));
 
+    for (int i = 0; i < el->num_edges * 2; i++)
+    {
+        deg[el->edges[i]]++;
+    }
+    csr->offsets[0] = 0;
+    for (int i = 1; i <= csr->verts; i++)
+    {
+        csr->offsets[i] = deg[i-1] + csr->offsets[i-1];
+        csr->max_degree = deg[i-1] > csr->max_degree ? deg[i-1] : csr->max_degree;
+        avg_degree_int += deg[i-1];
+    }
+    csr->avg_degree = (float)avg_degree_int / (float)csr->verts;
+    el->avg_degree = csr->avg_degree;
+    el->max_degree = csr->max_degree;
+
+    memcpy(deg, csr->offsets, sizeof(unsigned int) * csr->verts);
+    for (int i = 0; i < el->num_edges; i++)
+    {
+        csr->adjlist[deg[el->edges[i * 2]]++] = el->edges[i * 2 + 1];
+        csr->adjlist[deg[el->edges[i * 2 + 1]]++] = el->edges[i * 2];
+    }
+    free(deg);
+}
+
+void color_CSR(CSR *csr)
+{
+    short * seen = (short *) calloc(csr->verts + 1, sizeof(short));
+    for (int i = 0; i < csr->verts; i++)
+    {
+        int my_offset = csr->offsets[i];
+        int next_offset = csr->offsets[i+1];
+        for (int j = my_offset; j < next_offset; j++)
+        {
+            seen[csr->colors[csr->adjlist[j]]] = 1;
+        }
+        for (int j = 0; j < csr->verts + 1; j++)
+        {
+            if (csr->colors[i] == 0 && seen[j] == 0)
+            {
+                csr->colors[i] = j;
+                csr->chi = csr->chi > j ? csr->chi : j;
+            }
+            seen[j] = 0;
+        }
+    }
+}
+
+void verify_colors(CSR * csr, Edge_list_funcs * el)
+{
+    for (int i = 0; i < csr->edges; i++)
+    {
+        if (csr->colors[el->edges[i*2]] == csr->colors[el->edges[i*2+1]])
+            printf("FAILURE\n");
+    }
 }
 
 void init_rhs(Recursion_helper_stack * rhs)
@@ -1080,9 +1176,9 @@ void recursively_populate(Edge_list_funcs * el_list, Edge_list_funcs * el, int f
 =======
 void print_el_to_file(FILE* fp, Edge_list_funcs &el)
 {
-    if (el.recursed) fprintf(fp, "# (Recursed) "); else fprintf(fp, "# ");
-    fprintf(fp, "Function: %s\n# |V| = %d [0, %d]\n# |E| = %d\n# Number of unexpanded functions: %d, listed last\n\n",
-        el.func_name, el.num_verts, el.num_verts-1, el.num_edges, el.num_funcs);
+    if (el.recursed) fprintf(fp, "# (Recursed)\n");// else fprintf(fp, "# ");
+    fprintf(fp, "# Function: %s\n# |V| = %d [0, %d]\n# |E| = %d\n# CHI = %d\n# max_degree = %d\n# avg_degree = %f\n# Number of unexpanded functions: %d, listed last\n\n",
+        el.func_name, el.num_verts, el.num_verts-1, el.num_edges, el.chi, el.max_degree, el.avg_degree, el.num_funcs);
     for (int i = 0; i < el.num_edges; ++i)
     {
         fprintf(fp, "e %d %d\n", el.edges[i*2], el.edges[i*2+1]);
@@ -1148,6 +1244,12 @@ void generate_all_edge_lists(IRFuncs &funcs, char* fl_name, int recursive)
             fp = create_edgelist_file(fl_name);
         }
         generate_edge_list(funcs.funcs[ii], funcs.regs[ii], fp, el + ii);
+        sort_EL_quick(&el[ii], el[ii].edges);
+        CSR csr;
+        init_CSR(&csr, &el[ii]);
+        color_CSR(&csr);
+        el[ii].chi = csr.chi;
+        verify_colors(&csr, &el[ii]);
         print_el_to_file(fp, el[ii]);
         if (!recursive) fclose(fp);
     }
@@ -1183,9 +1285,12 @@ void generate_all_edge_lists(IRFuncs &funcs, char* fl_name, int recursive)
             el_recursed[ii].recursed = 1;
             recursively_populate(el, &el_recursed[ii], ii, &idx_offset, funcs.func_size, rhs, fp);
             el_recursed[ii].num_verts = idx_offset;
-            print_el_to_file(fp, el_recursed[ii]);
-            fprintf(fp, "SORTED TEST\n");
             sort_EL_quick(&el_recursed[ii], el_recursed[ii].edges);
+            CSR csr;
+            init_CSR(&csr, &el_recursed[ii]);
+            color_CSR(&csr);
+            el_recursed[ii].chi = csr.chi;
+            verify_colors(&csr, &el_recursed[ii]);
             print_el_to_file(fp, el_recursed[ii]);
             idx_offset = 0;
         }
