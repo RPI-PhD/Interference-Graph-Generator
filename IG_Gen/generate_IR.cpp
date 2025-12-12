@@ -410,14 +410,14 @@ void sort_EL_quick(Edge_list_funcs * el, unsigned int * edges)
 
 void init_CSR(CSR * csr, Edge_list_funcs * el)
 {
-    //expects a sorted edgelist
+    //expects a sorted edgelist nah nvm
     csr->edges = el->num_edges;
     csr->verts = el->num_verts;
     csr->max_degree = 0;
     int avg_degree_int = 0;
     csr->chi = 0;
     csr->adjlist = (unsigned int *) malloc(sizeof(unsigned int) * el->num_edges * 2);
-    csr->offsets = (unsigned int *) malloc(sizeof(unsigned int) * el->num_verts + 1);
+    csr->offsets = (unsigned int *) malloc(sizeof(unsigned int) * (el->num_verts + 1));
     csr->colors = (unsigned int *) calloc(el->num_verts, sizeof(unsigned int));
     unsigned int *deg = (unsigned int *) calloc(csr->verts, sizeof(unsigned int));
 
@@ -445,6 +445,13 @@ void init_CSR(CSR * csr, Edge_list_funcs * el)
     free(deg);
 }
 
+void free_CSR(CSR * csr)
+{
+    free(csr->adjlist);
+    free(csr->offsets);
+    free(csr->colors);
+}
+
 void color_CSR(CSR *csr)
 {
     short * seen = (short *) calloc(csr->verts + 1, sizeof(short));
@@ -466,6 +473,7 @@ void color_CSR(CSR *csr)
             seen[j] = 0;
         }
     }
+    free(seen);
 }
 
 void verify_colors(CSR * csr, Edge_list_funcs * el)
@@ -1244,12 +1252,13 @@ void generate_all_edge_lists(IRFuncs &funcs, char* fl_name, int recursive)
             fp = create_edgelist_file(fl_name);
         }
         generate_edge_list(funcs.funcs[ii], funcs.regs[ii], fp, el + ii);
-        sort_EL_quick(&el[ii], el[ii].edges);
+        // sort_EL_quick(&el[ii], el[ii].edges);
         CSR csr;
         init_CSR(&csr, &el[ii]);
         color_CSR(&csr);
         el[ii].chi = csr.chi;
         verify_colors(&csr, &el[ii]);
+        free_CSR(&csr);
         print_el_to_file(fp, el[ii]);
         if (!recursive) fclose(fp);
     }
@@ -1285,12 +1294,13 @@ void generate_all_edge_lists(IRFuncs &funcs, char* fl_name, int recursive)
             el_recursed[ii].recursed = 1;
             recursively_populate(el, &el_recursed[ii], ii, &idx_offset, funcs.func_size, rhs, fp);
             el_recursed[ii].num_verts = idx_offset;
-            sort_EL_quick(&el_recursed[ii], el_recursed[ii].edges);
+            // sort_EL_quick(&el_recursed[ii], el_recursed[ii].edges);
             CSR csr;
             init_CSR(&csr, &el_recursed[ii]);
             color_CSR(&csr);
             el_recursed[ii].chi = csr.chi;
             verify_colors(&csr, &el_recursed[ii]);
+            free_CSR(&csr);
             print_el_to_file(fp, el_recursed[ii]);
             idx_offset = 0;
         }
