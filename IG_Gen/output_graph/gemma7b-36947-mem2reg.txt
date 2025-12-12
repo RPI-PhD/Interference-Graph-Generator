@@ -1,0 +1,414 @@
+# Function: insertRecord
+# |V| = 13 [0, 12]
+# |E| = 40
+# CHI = 4
+# max_degree = 13
+# avg_degree = 6.153846
+# Number of unexpanded functions: 2, listed last
+
+e 0 12
+e 3 12
+e 5 12
+e 0 11
+e 3 11
+e 5 11
+e 0 10
+e 3 10
+e 5 10
+e 0 9
+e 3 9
+e 5 9
+e 10 9
+e 0 8
+e 2 8
+e 3 8
+e 5 8
+e 10 8
+e 0 7
+e 2 7
+e 3 7
+e 5 7
+e 10 7
+e 0 6
+e 1 6
+e 2 6
+e 3 6
+e 5 6
+e 10 6
+e 0 4
+e 1 4
+e 2 4
+e 3 4
+e 5 4
+e 10 4
+e 0 3
+e 1 3
+e 2 3
+e 5 3
+e 10 3
+strcpy 0 2 3 5 10
+malloc 0 1 2 5 10
+
+# Function: searchRecord
+# |V| = 17 [0, 16]
+# |E| = 69
+# CHI = 6
+# max_degree = 17
+# avg_degree = 8.117647
+# Number of unexpanded functions: 3, listed last
+
+e 1 16
+e 2 16
+e 3 16
+e 5 16
+e 8 16
+e 1 13
+e 2 13
+e 3 13
+e 5 13
+e 8 13
+e 1 12
+e 2 12
+e 3 12
+e 5 12
+e 8 12
+e 10 12
+e 1 11
+e 2 11
+e 3 11
+e 5 11
+e 8 11
+e 10 11
+e 1 10
+e 2 10
+e 3 10
+e 5 10
+e 8 10
+e 1 9
+e 2 9
+e 3 9
+e 5 9
+e 8 9
+e 1 8
+e 2 8
+e 3 8
+e 5 8
+e 1 7
+e 2 7
+e 3 7
+e 5 7
+e 8 7
+e 1 6
+e 2 6
+e 3 6
+e 5 6
+e 8 6
+e 1 4
+e 2 4
+e 3 4
+e 5 4
+e 8 4
+e 1 15
+e 2 15
+e 3 15
+e 5 15
+e 8 15
+e 1 14
+e 2 14
+e 3 14
+e 5 14
+e 8 14
+e 1 3
+e 2 3
+e 5 3
+e 8 3
+e 1 2
+e 3 2
+e 5 2
+e 8 2
+printf 1 2 3 5 8
+printf 1 2 3 5 8
+strcmp 1 2 3 5 8
+
+# Function: main
+# |V| = 3 [0, 2]
+# |E| = 0
+# CHI = 1
+# max_degree = 0
+# avg_degree = 0.000000
+# Number of unexpanded functions: 3, listed last
+
+insertRecord
+insertRecord
+insertRecord
+
+# (Recursed)
+# Function: insertRecord
+# |V| = 13 [0, 12]
+# |E| = 40
+# CHI = 4
+# max_degree = 13
+# avg_degree = 6.153846
+# Number of unexpanded functions: 2, listed last
+
+e 0 12
+e 3 12
+e 5 12
+e 0 11
+e 3 11
+e 5 11
+e 0 10
+e 3 10
+e 5 10
+e 0 9
+e 3 9
+e 5 9
+e 10 9
+e 0 8
+e 2 8
+e 3 8
+e 5 8
+e 10 8
+e 0 7
+e 2 7
+e 3 7
+e 5 7
+e 10 7
+e 0 6
+e 1 6
+e 2 6
+e 3 6
+e 5 6
+e 10 6
+e 0 4
+e 1 4
+e 2 4
+e 3 4
+e 5 4
+e 10 4
+e 0 3
+e 1 3
+e 2 3
+e 5 3
+e 10 3
+strcpy 0 2 3 5 10
+malloc 0 1 2 5 10
+
+# (Recursed)
+# Function: searchRecord
+# |V| = 17 [0, 16]
+# |E| = 69
+# CHI = 6
+# max_degree = 17
+# avg_degree = 8.117647
+# Number of unexpanded functions: 3, listed last
+
+e 1 16
+e 2 16
+e 3 16
+e 5 16
+e 8 16
+e 1 13
+e 2 13
+e 3 13
+e 5 13
+e 8 13
+e 1 12
+e 2 12
+e 3 12
+e 5 12
+e 8 12
+e 10 12
+e 1 11
+e 2 11
+e 3 11
+e 5 11
+e 8 11
+e 10 11
+e 1 10
+e 2 10
+e 3 10
+e 5 10
+e 8 10
+e 1 9
+e 2 9
+e 3 9
+e 5 9
+e 8 9
+e 1 8
+e 2 8
+e 3 8
+e 5 8
+e 1 7
+e 2 7
+e 3 7
+e 5 7
+e 8 7
+e 1 6
+e 2 6
+e 3 6
+e 5 6
+e 8 6
+e 1 4
+e 2 4
+e 3 4
+e 5 4
+e 8 4
+e 1 15
+e 2 15
+e 3 15
+e 5 15
+e 8 15
+e 1 14
+e 2 14
+e 3 14
+e 5 14
+e 8 14
+e 1 3
+e 2 3
+e 5 3
+e 8 3
+e 1 2
+e 3 2
+e 5 2
+e 8 2
+printf 1 2 3 5 8
+printf 1 2 3 5 8
+strcmp 1 2 3 5 8
+
+# (Recursed)
+# Function: main
+# |V| = 42 [0, 41]
+# |E| = 120
+# CHI = 4
+# max_degree = 13
+# avg_degree = 5.714286
+# Number of unexpanded functions: 6, listed last
+
+e 3 15
+e 6 15
+e 8 15
+e 3 14
+e 6 14
+e 8 14
+e 3 13
+e 6 13
+e 8 13
+e 3 12
+e 6 12
+e 8 12
+e 13 12
+e 3 11
+e 5 11
+e 6 11
+e 8 11
+e 13 11
+e 3 10
+e 5 10
+e 6 10
+e 8 10
+e 13 10
+e 3 9
+e 4 9
+e 5 9
+e 6 9
+e 8 9
+e 13 9
+e 3 7
+e 4 7
+e 5 7
+e 6 7
+e 8 7
+e 13 7
+e 3 6
+e 4 6
+e 5 6
+e 8 6
+e 13 6
+e 16 28
+e 19 28
+e 21 28
+e 16 27
+e 19 27
+e 21 27
+e 16 26
+e 19 26
+e 21 26
+e 16 25
+e 19 25
+e 21 25
+e 26 25
+e 16 24
+e 18 24
+e 19 24
+e 21 24
+e 26 24
+e 16 23
+e 18 23
+e 19 23
+e 21 23
+e 26 23
+e 16 22
+e 17 22
+e 18 22
+e 19 22
+e 21 22
+e 26 22
+e 16 20
+e 17 20
+e 18 20
+e 19 20
+e 21 20
+e 26 20
+e 16 19
+e 17 19
+e 18 19
+e 21 19
+e 26 19
+e 29 41
+e 32 41
+e 34 41
+e 29 40
+e 32 40
+e 34 40
+e 29 39
+e 32 39
+e 34 39
+e 29 38
+e 32 38
+e 34 38
+e 39 38
+e 29 37
+e 31 37
+e 32 37
+e 34 37
+e 39 37
+e 29 36
+e 31 36
+e 32 36
+e 34 36
+e 39 36
+e 29 35
+e 30 35
+e 31 35
+e 32 35
+e 34 35
+e 39 35
+e 29 33
+e 30 33
+e 31 33
+e 32 33
+e 34 33
+e 39 33
+e 29 32
+e 30 32
+e 31 32
+e 34 32
+e 39 32
+strcpy 3 5 6 8 13
+malloc 3 4 5 8 13
+strcpy 16 18 19 21 26
+malloc 16 17 18 21 26
+strcpy 29 31 32 34 39
+malloc 29 30 31 34 39
+

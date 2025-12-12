@@ -1,0 +1,453 @@
+# Function: move_car
+# |V| = 16 [0, 15]
+# |E| = 34
+# CHI = 3
+# max_degree = 13
+# avg_degree = 4.250000
+# Number of unexpanded functions: 0, listed last
+
+e 0 15
+e 4 15
+e 13 15
+e 0 14
+e 4 14
+e 13 14
+e 0 13
+e 4 13
+e 0 12
+e 4 12
+e 10 12
+e 0 11
+e 4 11
+e 10 11
+e 0 10
+e 4 10
+e 0 9
+e 4 9
+e 7 9
+e 0 8
+e 4 8
+e 7 8
+e 0 7
+e 4 7
+e 0 6
+e 3 6
+e 4 6
+e 0 5
+e 3 5
+e 4 5
+e 0 3
+e 4 3
+e 0 2
+e 4 2
+
+# Function: draw_car
+# |V| = 45 [0, 44]
+# |E| = 92
+# CHI = 3
+# max_degree = 38
+# avg_degree = 4.088889
+# Number of unexpanded functions: 12, listed last
+
+e 39 42
+e 39 41
+e 39 40
+e 0 39
+e 2 39
+e 0 38
+e 2 38
+e 0 37
+e 2 37
+e 0 36
+e 2 36
+e 0 35
+e 2 35
+e 0 34
+e 2 34
+e 32 34
+e 0 33
+e 2 33
+e 32 33
+e 0 32
+e 2 32
+e 0 31
+e 2 31
+e 0 30
+e 2 30
+e 0 29
+e 2 29
+e 0 28
+e 2 28
+e 0 27
+e 2 27
+e 24 27
+e 0 26
+e 2 26
+e 24 26
+e 0 25
+e 2 25
+e 24 25
+e 0 24
+e 2 24
+e 0 23
+e 2 23
+e 0 22
+e 2 22
+e 0 21
+e 2 21
+e 0 20
+e 2 20
+e 0 19
+e 2 19
+e 16 19
+e 0 18
+e 2 18
+e 16 18
+e 0 17
+e 2 17
+e 16 17
+e 0 16
+e 2 16
+e 0 15
+e 2 15
+e 0 14
+e 2 14
+e 0 13
+e 2 13
+e 0 12
+e 2 12
+e 9 12
+e 0 11
+e 2 11
+e 9 11
+e 0 10
+e 2 10
+e 9 10
+e 0 9
+e 2 9
+e 0 8
+e 2 8
+e 0 7
+e 2 7
+e 0 6
+e 2 6
+e 0 5
+e 2 5
+e 3 5
+e 0 4
+e 2 4
+e 3 4
+e 0 3
+e 2 3
+e 0 1
+e 2 1
+printf
+printf
+printf 0 2
+printf 0 2
+printf 0 2
+printf 0 2
+printf 0 2
+printf 0 2
+printf 0 2
+printf 0 2
+printf 0 2
+printf 0 2
+
+# Function: main
+# |V| = 15 [0, 14]
+# |E| = 56
+# CHI = 7
+# max_degree = 15
+# avg_degree = 7.466667
+# Number of unexpanded functions: 4, listed last
+
+e 0 14
+e 2 14
+e 11 14
+e 13 14
+e 0 13
+e 2 13
+e 11 13
+e 0 12
+e 2 12
+e 11 12
+e 13 12
+e 0 11
+e 2 11
+e 13 11
+e 0 10
+e 2 10
+e 13 10
+e 0 9
+e 2 9
+e 11 9
+e 13 9
+e 0 8
+e 2 8
+e 4 8
+e 6 8
+e 11 8
+e 13 8
+e 0 7
+e 2 7
+e 4 7
+e 6 7
+e 11 7
+e 13 7
+e 0 6
+e 2 6
+e 4 6
+e 11 6
+e 13 6
+e 0 5
+e 2 5
+e 3 5
+e 4 5
+e 11 5
+e 13 5
+e 0 4
+e 2 4
+e 3 4
+e 11 4
+e 13 4
+e 0 2
+e 3 2
+e 11 2
+e 13 2
+e 3 0
+e 11 0
+e 13 0
+tcsetattr 0 2 11 13
+getchar 0 2 13
+tcsetattr 0 2 11 13
+tcgetattr 0 2 3 4 11 13
+
+# (Recursed)
+# Function: move_car
+# |V| = 16 [0, 15]
+# |E| = 34
+# CHI = 3
+# max_degree = 13
+# avg_degree = 4.250000
+# Number of unexpanded functions: 0, listed last
+
+e 0 15
+e 4 15
+e 13 15
+e 0 14
+e 4 14
+e 13 14
+e 0 13
+e 4 13
+e 0 12
+e 4 12
+e 10 12
+e 0 11
+e 4 11
+e 10 11
+e 0 10
+e 4 10
+e 0 9
+e 4 9
+e 7 9
+e 0 8
+e 4 8
+e 7 8
+e 0 7
+e 4 7
+e 0 6
+e 3 6
+e 4 6
+e 0 5
+e 3 5
+e 4 5
+e 0 3
+e 4 3
+e 0 2
+e 4 2
+
+# (Recursed)
+# Function: draw_car
+# |V| = 45 [0, 44]
+# |E| = 92
+# CHI = 3
+# max_degree = 38
+# avg_degree = 4.088889
+# Number of unexpanded functions: 12, listed last
+
+e 39 42
+e 39 41
+e 39 40
+e 0 39
+e 2 39
+e 0 38
+e 2 38
+e 0 37
+e 2 37
+e 0 36
+e 2 36
+e 0 35
+e 2 35
+e 0 34
+e 2 34
+e 32 34
+e 0 33
+e 2 33
+e 32 33
+e 0 32
+e 2 32
+e 0 31
+e 2 31
+e 0 30
+e 2 30
+e 0 29
+e 2 29
+e 0 28
+e 2 28
+e 0 27
+e 2 27
+e 24 27
+e 0 26
+e 2 26
+e 24 26
+e 0 25
+e 2 25
+e 24 25
+e 0 24
+e 2 24
+e 0 23
+e 2 23
+e 0 22
+e 2 22
+e 0 21
+e 2 21
+e 0 20
+e 2 20
+e 0 19
+e 2 19
+e 16 19
+e 0 18
+e 2 18
+e 16 18
+e 0 17
+e 2 17
+e 16 17
+e 0 16
+e 2 16
+e 0 15
+e 2 15
+e 0 14
+e 2 14
+e 0 13
+e 2 13
+e 0 12
+e 2 12
+e 9 12
+e 0 11
+e 2 11
+e 9 11
+e 0 10
+e 2 10
+e 9 10
+e 0 9
+e 2 9
+e 0 8
+e 2 8
+e 0 7
+e 2 7
+e 0 6
+e 2 6
+e 0 5
+e 2 5
+e 3 5
+e 0 4
+e 2 4
+e 3 4
+e 0 3
+e 2 3
+e 0 1
+e 2 1
+printf
+printf
+printf 0 2
+printf 0 2
+printf 0 2
+printf 0 2
+printf 0 2
+printf 0 2
+printf 0 2
+printf 0 2
+printf 0 2
+printf 0 2
+
+# (Recursed)
+# Function: main
+# |V| = 15 [0, 14]
+# |E| = 56
+# CHI = 7
+# max_degree = 15
+# avg_degree = 7.466667
+# Number of unexpanded functions: 4, listed last
+
+e 0 14
+e 2 14
+e 11 14
+e 13 14
+e 0 13
+e 2 13
+e 11 13
+e 0 12
+e 2 12
+e 11 12
+e 13 12
+e 0 11
+e 2 11
+e 13 11
+e 0 10
+e 2 10
+e 13 10
+e 0 9
+e 2 9
+e 11 9
+e 13 9
+e 0 8
+e 2 8
+e 4 8
+e 6 8
+e 11 8
+e 13 8
+e 0 7
+e 2 7
+e 4 7
+e 6 7
+e 11 7
+e 13 7
+e 0 6
+e 2 6
+e 4 6
+e 11 6
+e 13 6
+e 0 5
+e 2 5
+e 3 5
+e 4 5
+e 11 5
+e 13 5
+e 0 4
+e 2 4
+e 3 4
+e 11 4
+e 13 4
+e 0 2
+e 3 2
+e 11 2
+e 13 2
+e 3 0
+e 11 0
+e 13 0
+tcsetattr 0 2 11 13
+getchar 0 2 13
+tcsetattr 0 2 11 13
+tcgetattr 0 2 3 4 11 13
+
