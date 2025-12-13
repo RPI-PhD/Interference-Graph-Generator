@@ -1,0 +1,469 @@
+{
+	"void" : 	{
+		"nodes" : {
+			"%1" : {
+				"type" : "unidentified",
+				"uses" : [2, 3],
+				"uses deepness" : [0, 0]
+			},
+			"%2" : {
+				"type" : "i32",
+				"uses" : [3, 4],
+				"uses deepness" : [0, 0]
+			},
+			"%3" : {
+				"type" : "unidentified",
+				"uses" : [5, 6],
+				"uses deepness" : [0, 0]
+			},
+			"%4" : {
+				"type" : "ptr",
+				"uses" : [6, 7],
+				"uses deepness" : [0, 0]
+			},
+			"%5" : {
+				"type" : "label",
+				"uses" : [7],
+				"uses deepness" : [0]
+			},
+			"%8" : {
+				"type" : "label",
+				"uses" : [7],
+				"uses deepness" : [0]
+			},
+			"%0" : {
+				"type" : "label",
+				"uses" : [9, 15],
+				"uses deepness" : [0, 0]
+			},
+			"%6" : {
+				"type" : "unidentified",
+				"uses" : [10, 11],
+				"uses deepness" : [0, 0]
+			},
+			"%7" : {
+				"type" : "i32",
+				"uses" : [11],
+				"uses deepness" : [0]
+			}
+		},
+		"edges" : [
+			{
+				"node 1" : "%1",
+				"node 2" : "%2"
+
+			},
+			{
+				"node 1" : "%3",
+				"node 2" : "%4"
+
+			},
+			{
+				"node 1" : "%4",
+				"node 2" : "%5"
+
+			},
+			{
+				"node 1" : "%4",
+				"node 2" : "%8"
+
+			},
+			{
+				"node 1" : "%5",
+				"node 2" : "%8"
+
+			},
+			{
+				"node 1" : "%0",
+				"node 2" : "%6"
+
+			},
+			{
+				"node 1" : "%0",
+				"node 2" : "%7"
+
+			},
+			{
+				"node 1" : "%6",
+				"node 2" : "%7"
+
+			}
+		]
+	},
+	"i32" : 	{
+		"nodes" : {
+			"%1" : {
+				"type" : "i64",
+				"uses" : [2, 3],
+				"uses deepness" : [0, 0]
+			},
+			"%2" : {
+				"type" : "i64",
+				"uses" : [3, 4],
+				"uses deepness" : [0, 0]
+			},
+			"%3" : {
+				"type" : "label",
+				"uses" : [5, 12, 18, 20],
+				"uses deepness" : [0, 1, 1, 1]
+			},
+			"%6" : {
+				"type" : "label",
+				"uses" : [7, 8, 14],
+				"uses deepness" : [0, 1, 1]
+			},
+			"%0" : {
+				"type" : "label",
+				"uses" : [7, 8],
+				"uses deepness" : [0, 1]
+			},
+			"%.0" : {
+				"type" : "i32",
+				"uses" : [8, 9, 17],
+				"uses deepness" : [1, 1, 1]
+			},
+			"%7" : {
+				"type" : "i32",
+				"uses" : [8, 17],
+				"uses deepness" : [1, 1]
+			},
+			"%4" : {
+				"type" : "ptr",
+				"uses" : [9, 10],
+				"uses deepness" : [1, 1]
+			},
+			"%5" : {
+				"type" : "label",
+				"uses" : [10, 16],
+				"uses deepness" : [1, 1]
+			},
+			"%8" : {
+				"type" : "label",
+				"uses" : [10, 23, 24],
+				"uses deepness" : [1, 1, 1]
+			},
+			"%9" : {
+				"type" : "label",
+				"uses" : [21, 28, 37, 39],
+				"uses deepness" : [1, 1, 1, 1]
+			},
+			"%13" : {
+				"type" : "label",
+				"uses" : [23, 24, 33],
+				"uses deepness" : [1, 1, 1]
+			},
+			"%.1" : {
+				"type" : "i32",
+				"uses" : [24, 25, 36],
+				"uses deepness" : [1, 1, 1]
+			},
+			"%14" : {
+				"type" : "i32",
+				"uses" : [24, 36],
+				"uses deepness" : [1, 1]
+			},
+			"%10" : {
+				"type" : "ptr",
+				"uses" : [25, 26],
+				"uses deepness" : [1, 1]
+			},
+			"%11" : {
+				"type" : "label",
+				"uses" : [26, 35],
+				"uses deepness" : [1, 1]
+			},
+			"%15" : {
+				"type" : "label",
+				"uses" : [26],
+				"uses deepness" : [1]
+			},
+			"%12" : {
+				"type" : "i32",
+				"uses" : [29],
+				"uses deepness" : [1]
+			}
+		},
+		"edges" : [
+			{
+				"node 1" : "%1",
+				"node 2" : "%2"
+
+			},
+			{
+				"node 1" : "%3",
+				"node 2" : "%6"
+
+			},
+			{
+				"node 1" : "%3",
+				"node 2" : "%0"
+
+			},
+			{
+				"node 1" : "%3",
+				"node 2" : "%.0"
+
+			},
+			{
+				"node 1" : "%3",
+				"node 2" : "%7"
+
+			},
+			{
+				"node 1" : "%3",
+				"node 2" : "%4"
+
+			},
+			{
+				"node 1" : "%3",
+				"node 2" : "%5"
+
+			},
+			{
+				"node 1" : "%3",
+				"node 2" : "%8"
+
+			},
+			{
+				"node 1" : "%6",
+				"node 2" : "%0"
+
+			},
+			{
+				"node 1" : "%6",
+				"node 2" : "%.0"
+
+			},
+			{
+				"node 1" : "%6",
+				"node 2" : "%7"
+
+			},
+			{
+				"node 1" : "%6",
+				"node 2" : "%4"
+
+			},
+			{
+				"node 1" : "%6",
+				"node 2" : "%5"
+
+			},
+			{
+				"node 1" : "%6",
+				"node 2" : "%8"
+
+			},
+			{
+				"node 1" : "%0",
+				"node 2" : "%.0"
+
+			},
+			{
+				"node 1" : "%0",
+				"node 2" : "%7"
+
+			},
+			{
+				"node 1" : "%.0",
+				"node 2" : "%7"
+
+			},
+			{
+				"node 1" : "%.0",
+				"node 2" : "%4"
+
+			},
+			{
+				"node 1" : "%.0",
+				"node 2" : "%5"
+
+			},
+			{
+				"node 1" : "%.0",
+				"node 2" : "%8"
+
+			},
+			{
+				"node 1" : "%7",
+				"node 2" : "%4"
+
+			},
+			{
+				"node 1" : "%7",
+				"node 2" : "%5"
+
+			},
+			{
+				"node 1" : "%7",
+				"node 2" : "%8"
+
+			},
+			{
+				"node 1" : "%4",
+				"node 2" : "%5"
+
+			},
+			{
+				"node 1" : "%4",
+				"node 2" : "%8"
+
+			},
+			{
+				"node 1" : "%5",
+				"node 2" : "%8"
+
+			},
+			{
+				"node 1" : "%8",
+				"node 2" : "%9"
+
+			},
+			{
+				"node 1" : "%8",
+				"node 2" : "%13"
+
+			},
+			{
+				"node 1" : "%8",
+				"node 2" : "%.1"
+
+			},
+			{
+				"node 1" : "%8",
+				"node 2" : "%14"
+
+			},
+			{
+				"node 1" : "%9",
+				"node 2" : "%13"
+
+			},
+			{
+				"node 1" : "%9",
+				"node 2" : "%.1"
+
+			},
+			{
+				"node 1" : "%9",
+				"node 2" : "%14"
+
+			},
+			{
+				"node 1" : "%9",
+				"node 2" : "%10"
+
+			},
+			{
+				"node 1" : "%9",
+				"node 2" : "%11"
+
+			},
+			{
+				"node 1" : "%9",
+				"node 2" : "%15"
+
+			},
+			{
+				"node 1" : "%9",
+				"node 2" : "%12"
+
+			},
+			{
+				"node 1" : "%13",
+				"node 2" : "%.1"
+
+			},
+			{
+				"node 1" : "%13",
+				"node 2" : "%14"
+
+			},
+			{
+				"node 1" : "%13",
+				"node 2" : "%10"
+
+			},
+			{
+				"node 1" : "%13",
+				"node 2" : "%11"
+
+			},
+			{
+				"node 1" : "%13",
+				"node 2" : "%15"
+
+			},
+			{
+				"node 1" : "%13",
+				"node 2" : "%12"
+
+			},
+			{
+				"node 1" : "%.1",
+				"node 2" : "%14"
+
+			},
+			{
+				"node 1" : "%.1",
+				"node 2" : "%10"
+
+			},
+			{
+				"node 1" : "%.1",
+				"node 2" : "%11"
+
+			},
+			{
+				"node 1" : "%.1",
+				"node 2" : "%15"
+
+			},
+			{
+				"node 1" : "%.1",
+				"node 2" : "%12"
+
+			},
+			{
+				"node 1" : "%14",
+				"node 2" : "%10"
+
+			},
+			{
+				"node 1" : "%14",
+				"node 2" : "%11"
+
+			},
+			{
+				"node 1" : "%14",
+				"node 2" : "%15"
+
+			},
+			{
+				"node 1" : "%14",
+				"node 2" : "%12"
+
+			},
+			{
+				"node 1" : "%10",
+				"node 2" : "%11"
+
+			},
+			{
+				"node 1" : "%10",
+				"node 2" : "%15"
+
+			},
+			{
+				"node 1" : "%11",
+				"node 2" : "%15"
+
+			},
+			{
+				"node 1" : "%11",
+				"node 2" : "%12"
+
+			}
+		]
+	}
+}

@@ -94,8 +94,11 @@ def compute_stats(folder):
         ax3.set_ylabel('Graph Frequency')
 
     fig.tight_layout()
+    fig.savefig('eoverv.png')
     fig2.tight_layout()
+    fig2.savefig('chi.png')
     fig3.tight_layout()
+    fig3.savefig('eoverchi.png')
 
     plt.show()
 

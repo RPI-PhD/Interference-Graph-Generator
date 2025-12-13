@@ -1,0 +1,154 @@
+{
+	"i32" : 	{
+		"nodes" : {
+			"%1" : {
+				"type" : "ptr",
+				"uses" : [2, 5, 7],
+				"uses deepness" : [0, 0, 0]
+			},
+			"%2" : {
+				"type" : "i32",
+				"uses" : [3],
+				"uses deepness" : [0]
+			},
+			"%3" : {
+				"type" : "i32",
+				"uses" : [4],
+				"uses deepness" : [0]
+			},
+			"%4" : {
+				"type" : "i32",
+				"uses" : [5, 6],
+				"uses deepness" : [0, 0]
+			},
+			"%5" : {
+				"type" : "ptr",
+				"uses" : [7, 8],
+				"uses deepness" : [0, 0]
+			},
+			"%6" : {
+				"type" : "i32",
+				"uses" : [9],
+				"uses deepness" : [0]
+			}
+		},
+		"edges" : [
+			{
+				"node 1" : "%1",
+				"node 2" : "%2"
+
+			},
+			{
+				"node 1" : "%1",
+				"node 2" : "%3"
+
+			},
+			{
+				"node 1" : "%1",
+				"node 2" : "%4"
+
+			},
+			{
+				"node 1" : "%1",
+				"node 2" : "%5"
+
+			}
+		]
+	},
+	"void" : 	{
+		"nodes" : {
+			"%0" : {
+				"type" : "label",
+				"uses" : [1, 4, 5, 6],
+				"uses deepness" : [0, 0, 0, 0]
+			},
+			"%1" : {
+				"type" : "unidentified",
+				"uses" : [1, 4],
+				"uses deepness" : [0, 0]
+			},
+			"%3" : {
+				"type" : "i32",
+				"uses" : [2],
+				"uses deepness" : [0]
+			},
+			"%4" : {
+				"type" : "unidentified",
+				"uses" : [3, 4],
+				"uses deepness" : [0, 0]
+			},
+			"%5" : {
+				"type" : "i32",
+				"uses" : [4],
+				"uses deepness" : [0]
+			},
+			"%6" : {
+				"type" : "i64",
+				"uses" : [5, 6],
+				"uses deepness" : [0, 0]
+			},
+			"%7" : {
+				"type" : "ptr",
+				"uses" : [6, 7],
+				"uses deepness" : [0, 0]
+			}
+		},
+		"edges" : [
+			{
+				"node 1" : "%0",
+				"node 2" : "%1"
+
+			},
+			{
+				"node 1" : "%0",
+				"node 2" : "%3"
+
+			},
+			{
+				"node 1" : "%0",
+				"node 2" : "%4"
+
+			},
+			{
+				"node 1" : "%0",
+				"node 2" : "%5"
+
+			},
+			{
+				"node 1" : "%0",
+				"node 2" : "%6"
+
+			},
+			{
+				"node 1" : "%0",
+				"node 2" : "%7"
+
+			},
+			{
+				"node 1" : "%1",
+				"node 2" : "%3"
+
+			},
+			{
+				"node 1" : "%1",
+				"node 2" : "%4"
+
+			},
+			{
+				"node 1" : "%1",
+				"node 2" : "%5"
+
+			},
+			{
+				"node 1" : "%4",
+				"node 2" : "%5"
+
+			},
+			{
+				"node 1" : "%6",
+				"node 2" : "%7"
+
+			}
+		]
+	}
+}
