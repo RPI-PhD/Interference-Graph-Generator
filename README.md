@@ -8,7 +8,7 @@ Haven Cook, Ethan Rapa
 
 
 ## <u>Important Content</u>
-#### << *[Read the Full Paper](Reports%20and%20Slides/Final%20Report)*
+#### << *[Read the Full Paper](Reports_and_Slides/Final_Report/DLOG_final_report.pdf)*
 #### << *[Graph Generator](IG_Gen/generate_IR.cpp)*
 #### << *[Sample Large Dataset](IG_Gen/DATASETv2)*
 
