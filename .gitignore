@@ -1,4 +1,7 @@
 cmake-build-debug
 cmake-build-debug-coverage
 .idea
+IG_Gen/output_graph
+IG_Gen/LLVM_IR
+CMakeLists.txt
 
