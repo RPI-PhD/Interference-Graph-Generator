@@ -2,8 +2,6 @@
 
 #### Large-scale LLVM-based interference graph generation for graph coloring
 
-Haven Cook, Andrew Erickson, Ethan Rapa
-
 ![](Reports_and_Slides/Final_Report/figures/Workflow.png)
 
 
