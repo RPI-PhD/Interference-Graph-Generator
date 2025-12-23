@@ -1,5 +1,11 @@
+#
+# NOTE: we have all these safety flags appended because this is not meant to be the fast way
+#
+# Use build.ninja for large jobs
+#
+
 CXX = g++
-override CXXFLAGS := -std=c++17 -pedantic -g $(CXXFLAGS)
+override CXXFLAGS := -std=c++17 -Wall -Werror -Wextra -fsanitize=address -pedantic -g $(CXXFLAGS)
 
 INP_DIR = DATASETv2
 IR_DIR  = LLVM_IR
@@ -8,7 +14,6 @@ OUT_DIR = output_graph
 INP_FILES := $(wildcard $(INP_DIR)/*.c)
 
 IR_FILES := $(INP_FILES:$(INP_DIR)/%.c=$(IR_DIR)/%-mem2reg.ll)
-#IR_FILES := $(wildcard $(IR_DIR)/*.ll)
 
 OUTPUT_FILES := $(IR_FILES:$(IR_DIR)/%-mem2reg.ll=$(OUT_DIR)/%-mem2reg.txt)
 
@@ -31,7 +36,7 @@ dirs:
 	mkdir -p $(IR_DIR) $(OUT_DIR)
 
 $(IR_DIR)/%-mem2reg.ll: $(INP_DIR)/%.c | dirs
-	/bin/bash compile_to_ir.sh $<
+	/bin/bash compile_to_ir.sh "$<" "$@"
 
 genfiles: $(IR_FILES)
 

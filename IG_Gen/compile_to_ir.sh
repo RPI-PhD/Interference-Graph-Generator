@@ -1,18 +1,11 @@
 #!/bin/bash
+set -euo pipefail
 
-for inp in "$@"
-do
+inp="$1"
+out_mem2reg="$2"
 
-  outputllpart="${inp/.c/.ll}"
+tmp_ll="${out_mem2reg%-mem2reg.ll}.ll"
 
-  outputll="${outputllpart/DATASETv2/LLVM_IR}"
-
-  clang -S -emit-llvm -O0 "$inp" -o "$outputll"
-
-  sed -i 's/optnone//g' "$outputll"
-
-  output="${outputll/.ll/-mem2reg.ll}"
-
-  opt -passes='default<O0>,mem2reg' -S "$outputll" -o "$output"
-
-done
+clang -S -emit-llvm -O0 "$inp" -o "$tmp_ll"
+sed -i 's/optnone//g' "$tmp_ll"
+opt -passes='default<O0>,mem2reg' -S "$tmp_ll" -o "$out_mem2reg"

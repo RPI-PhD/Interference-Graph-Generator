@@ -15,7 +15,7 @@
 
 #define TRUE_                   1
 #define FALSE_                  0
-#define MAX_USE_DEF             8
+#define MAX_USE_DEF             20
 #define MAX_ID_NAME_LEN         50
 #define BYTES_PER_FUNCTION      50
 #define MAX_PREDECESSORS        10
@@ -191,6 +191,12 @@ static inline int bit_is_active(bitReg *regs, int regnum){
 static inline void clear_bits(bitReg *regs){
     memset(regs->bits,0,regs->reglines * sizeof(BITSIZE));
 }
+
+static inline const char *skip_whitespace(const char *p){
+    for (; *p == ' ' || *p == '\t'; ++p);
+    return p;
+}
+
 /*
  * String search state machines
  * phi_machine = std::regex phi_pair_re(R"(\[\s*([^,\]]+)\s*,\s*([^]\]]+)\])");
@@ -232,7 +238,7 @@ const char * reg_machine(const char *p, long &len)
     const char * start = NULL;
     len = 0;
 
-    for (; *p != '%' && *p != '\n'; ++p){}
+    for (; *p != '%' && *p != '\n'; ++p) { if (*p == '(') p += 2; } // need to check for edge case '(%'
 
     while (*p != '\n' && *p != ',' && *p != ' ' && *p != ')'){
         if (*p == '%'){
@@ -348,12 +354,12 @@ void add_func(Edge_list_funcs * el, char* func_id, int size)
     el->num_funcs++;
 }
 
-void sort_EL_counting(Edge_list_funcs * el, unsigned int * edges)
-{
-    // IMPORTANT: this expects an array of unsigned INTS where [e[n], e[n+1]] represents an edge pair
-    // in order to sort this by src edge then dst edge, it needs to be cast to a long pointer before the call
-
-}
+//void sort_EL_counting(Edge_list_funcs * el, unsigned int * edges)
+//{
+//    // IMPORTANT: this expects an array of unsigned INTS where [e[n], e[n+1]] represents an edge pair
+//    // in order to sort this by src edge then dst edge, it needs to be cast to a long pointer before the call
+//
+//}
 
 void swap(unsigned long* a, unsigned long* b)
 {
@@ -586,17 +592,6 @@ void compute_use_def_instr(const char *line,
     sz_def = &instr->size_def;
     sz_use = &instr->size_use;
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-    if (phi_idx != 0){
-        num_pred = &phis->num_pred;
-        predecessors = phis->predecessors;
-    }
-
->>>>>>> 0a73154 (undoing ethans stupidity)
-=======
->>>>>>> c5885aa (Haven nuked the repo and new we have to do a rollback)
     callcheck = strstr(line, "call ");
 
     if (callcheck == NULL)
@@ -625,32 +620,8 @@ void compute_use_def_instr(const char *line,
     token = reg_machine(token,tok_len);
     for (; token != NULL && token < lhs; token = reg_machine(++token,tok_len)){
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-    std::cregex_iterator begin_rhs(rhs,txt_end,(is_phi ? phi_pair_re : re));
-    std::cregex_iterator begin_lhs(line,lhs,re);
-=======
-    std::cregex_iterator begin_rhs(rhs,txt_end,re);
-    std::cregex_iterator begin_lhs(line,lhs,(is_phi ? phi_pair_re : re));
->>>>>>> 0a73154 (undoing ethans stupidity)
-=======
-    std::cregex_iterator begin_rhs(rhs,txt_end,(is_phi ? phi_pair_re : re));
-    std::cregex_iterator begin_lhs(line,lhs,re);
->>>>>>> c5885aa (Haven nuked the repo and new we have to do a rollback)
-
-    std::cregex_iterator end;
-
-    for(std::cregex_iterator it = begin_lhs; it != end; ++it){
-        const std::cmatch &m = *it;
-        token = m[0].first;
-
-        snprintf(block->instrcts[instr_idx].def[*sz_def], m[0].length() + 1,"%.*s",(int)m[0].length(),token);
-        std::string map_token(block->instrcts[instr_idx].def[*sz_def],m[0].length());
-=======
         snprintf(block->instrcts[instr_idx].def[*sz_def], tok_len + 1,"%.*s",(int)tok_len,token);
         std::string map_token(block->instrcts[instr_idx].def[*sz_def],tok_len);
->>>>>>> 953ac0d (did some stuff)
 
         if (regMap.find(map_token) == regMap.end()){
             regMap[map_token] = reg_idx;
@@ -664,39 +635,14 @@ void compute_use_def_instr(const char *line,
     token = rhs;
     if (is_phi){
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> c5885aa (Haven nuked the repo and new we have to do a rollback)
         num_pred = &phis->num_pred;
         predecessors = phis->predecessors;
         *num_pred = 0;
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> 0a73154 (undoing ethans stupidity)
-=======
->>>>>>> c5885aa (Haven nuked the repo and new we have to do a rollback)
-        for(std::cregex_iterator it = begin_rhs; it != end; ++it){
-            const std::cmatch &m = *it;
-            virt_reg = m[1].first;
-            bl_label = m[2].first;
-
-            /* Skip any constant optimizations like [ 0, %2 ] since we don't need to look back at %2
-             *
-             *  I'm not sure if this logic is right
-             */
-            if (virt_reg[0] != '%'){
-=======
         token = phi_machine(token,tok_len);
         for (; token != NULL; token = phi_machine(token,tok_len)){
             if (token[0] != '%'){
-<<<<<<< HEAD
->>>>>>> 953ac0d (did some stuff)
-=======
                 token = phi_machine(token,tok_len);
->>>>>>> 995a8b4 (Working on debugging)
                 continue;
             }
 
@@ -734,7 +680,7 @@ void compute_use_def_instr(const char *line,
     block->num_instr++;
 }
 
-void compute_successors(char *line,
+void compute_successors(const char *line,
                         Block *block,
                         Register_mapping &regMap,
                         int &reg_idx){
@@ -806,6 +752,42 @@ void compute_successors(char *line,
     block->num_succ = original_num_succ;
 }
 
+static inline LINE_TYPE handle_switch(char *&line,
+                            Block *block,
+                            Register_mapping &regMap,
+                            int &reg_idx,
+                            FILE *fp,
+                            size_t &len){
+
+    block->num_succ = 0;
+    block->succ_len = 4;
+
+    block->successors = (int*)malloc(block->succ_len * sizeof(int));
+
+    while (line[2] != ']'){
+
+        compute_successors(line,block,regMap,reg_idx);
+        getline(&line, &len, fp);
+
+    }
+
+    return LINE_TYPE::BRANCH;
+
+}
+
+static inline LINE_TYPE handle_br(const char *line,
+                            Block *block,
+                            Register_mapping &regMap,
+                            int &reg_idx){
+    block->num_succ = 0;
+    block->succ_len = 2;
+
+    block->successors = (int*)malloc(block->succ_len * sizeof(int));
+
+    compute_successors(line,block,regMap,reg_idx);
+    return LINE_TYPE::BRANCH;
+}
+
 // Note to self: Function will be on the stack...only need 1
 LINE_TYPE set_up_blocks(char *&line, Function &blocks,
                         size_t block_idx,
@@ -870,44 +852,65 @@ LINE_TYPE set_up_blocks(char *&line, Function &blocks,
         is_phi = TRUE_;
     }
 
+
+    const char *no_space = skip_whitespace(line);
+
     /*
-     * If we see a branch at the end of a block, we need to store the successors
+     * Below we handle all the different terminator instructions. We are following LLVM standard here:
+     * https://llvm.org/docs/LangRef.html
      *
-     * Went with a hash table instead of tree just cuz (would've done tree if still in C)
+     * Very ugly but quite fast | I dare you to come up with something cleaner but same speed
+     *
      */
+    switch (no_space[0]) {
 
-    if (strncmp(line,"  switch", 8) == 0){
+        // 'switch' instruction
+        case 's':
 
-        block->num_succ = 0;
-        block->succ_len = 4;
+            if (strncmp(no_space,"switch", 6) == 0){
 
-        block->successors = (int*)malloc(block->succ_len * sizeof(int));
+                return handle_switch(line,
+                                     block,
+                                     regMap,
+                                     reg_idx,
+                                     fp,
+                                     len);
 
-        while (line[2] != ']'){
+            }
+            goto default_case;
+            
+            
+        // 'br' instruction
+        case 'b':
 
-            compute_successors(line,block,regMap,reg_idx);
-            getline(&line, &len, fp);
+            if (strncmp(no_space,"br", 2) == 0){
+                return handle_br(no_space,block,regMap,reg_idx);
+            }
+            goto default_case;
 
-        }
+        // 'ret' instruction
+        case 'r':
 
-        return LINE_TYPE::BRANCH;
+            if (strncmp(no_space,"ret",3) == 0){
+                return LINE_TYPE::BRANCH;
+            }
+            goto default_case;
+
+        // 'unreachable' instruction
+        case 'u':
+
+            if (strncmp(no_space,"unreachable",11) == 0){
+                return LINE_TYPE::BRANCH;
+            }
+            goto default_case;
+
+        // non-terminator
+        default:
+        default_case:
+            compute_use_def_instr(no_space,block,regMap,reg_idx,is_phi);
+            return LINE_TYPE::INTERMEDIATE;
     }
 
-
-    if (strncmp(line,"  br", 4) == 0){
-
-        block->num_succ = 0;
-        block->succ_len = 2;
-
-        block->successors = (int*)malloc(block->succ_len * sizeof(int));
-
-        compute_successors(line,block,regMap,reg_idx);
-        return LINE_TYPE::BRANCH;
-    }
-
-    // Per-instruction use/def populating
-    compute_use_def_instr(line,block,regMap,reg_idx,is_phi);
-    return LINE_TYPE::INTERMEDIATE;
 }
 
 // https://www.geeksforgeeks.org/compiler-design/liveliness-analysis-in-compiler-design/
@@ -966,35 +969,16 @@ void compute_in_out(Function &blocks, int num_regs){
     free(out_copy.bits);
 }
 
-/*
-*    size_t label;
-
-    size_t instr_len;   // space malloc'd
-    size_t num_instr;   // number of instructions we have
-
-    size_t Phi_len;
-    size_t num_Phi;
-
-    size_t num_succ;    // number of successors we have
-    size_t succ_len;    // space malloc'd
-
-    bitReg use_block;   // Doing this because per block requires WAY more registers than per instruction
-    bitReg def_block;
-    bitReg in_block;
-    bitReg out_block;
-
-    int *successors;    //instead of Block**, just have array of indices to look up in Function
-
-    Instruct *instrcts;
-    Phi *phis;
-    */
-
 void free_heap_alloc(Function &blocks){
     for (std::pair<const size_t,Block> &block : blocks){
 
         Block *bl = &block.second;
 
-        for (int i = 0; i < (int)bl->num_instr; i++) if (bl->instrcts[i].func_name != NULL) free(bl->instrcts[i].func_name);
+        for (int i = 0; i < (int)bl->num_instr; i++) {
+            if (bl->instrcts[i].func_name != NULL)
+                free(bl->instrcts[i].func_name);
+        }
+
         free(bl->instrcts);
         free(bl->successors);
         free(bl->use_block.bits);
@@ -1032,7 +1016,6 @@ FILE *create_edgelist_file(char fl_name[]){
 
 void generate_edge_list(Function &blocks,
                         Register_mapping regmap,
-                        FILE* fp,
                         Edge_list_funcs * el){
     int i, r, regnum_d, regnum_u;
     size_t d, u;
@@ -1085,6 +1068,7 @@ void generate_edge_list(Function &blocks,
                             idx++;
                         }
                     }
+
                 }
 
             }
@@ -1176,12 +1160,6 @@ void recursively_populate(Edge_list_funcs * el_list, Edge_list_funcs * el, int p
     if (rhs->cur_depth >= 0) rhs->cur_depth--;
 }
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> 955d7f1 (ethan spreads false information and maliciously deletes files on my computer so he can blame it on me)
-=======
 void print_el_to_file(FILE* fp, Edge_list_funcs &el)
 {
     if (el.recursed) fprintf(fp, "# (Recursed)\n");// else fprintf(fp, "# ");
@@ -1202,7 +1180,6 @@ void print_el_to_file(FILE* fp, Edge_list_funcs &el)
     fprintf(fp, "\n");
 }
 
->>>>>>> fc1d6bb (cleaned up output order of operations)
 void cleanup(Edge_list_funcs * el_list, Recursion_helper_stack * rhs, int numfuncs)
 {
     for (int i = 0; i < numfuncs; i++)
@@ -1220,20 +1197,9 @@ void cleanup(Edge_list_funcs * el_list, Recursion_helper_stack * rhs, int numfun
     free(rhs);
 }
 
-<<<<<<< HEAD
 void generate_all_edge_lists(IRFuncs &funcs, char* fl_name, int recursive)
 {
     FILE* fp = NULL;
-=======
-void generate_all_edge_lists(IRFuncs &funcs, char* fl_name, int recursive)
-{
-    FILE* fp;
->>>>>>> 0a73154 (undoing ethans stupidity)
-=======
-void generate_all_edge_lists(IRFuncs &funcs, char* fl_name, int recursive)
-{
-    FILE* fp = NULL;
->>>>>>> 955d7f1 (ethan spreads false information and maliciously deletes files on my computer so he can blame it on me)
     Edge_list_funcs * el = (Edge_list_funcs*) malloc(sizeof(Edge_list_funcs) * funcs.func_size);
     Edge_list_funcs * el_recursed = (Edge_list_funcs*) malloc(sizeof(Edge_list_funcs) * funcs.func_size);
 
@@ -1251,8 +1217,7 @@ void generate_all_edge_lists(IRFuncs &funcs, char* fl_name, int recursive)
             strcat(fl_name, ".txt");
             fp = create_edgelist_file(fl_name);
         }
-        generate_edge_list(funcs.funcs[ii], funcs.regs[ii], fp, el + ii);
-        // sort_EL_quick(&el[ii], el[ii].edges);
+        generate_edge_list(funcs.funcs[ii], funcs.regs[ii], el + ii);
         CSR csr;
         init_CSR(&csr, &el[ii]);
         color_CSR(&csr);
@@ -1262,30 +1227,18 @@ void generate_all_edge_lists(IRFuncs &funcs, char* fl_name, int recursive)
         print_el_to_file(fp, el[ii]);
         if (!recursive) fclose(fp);
     }
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> 955d7f1 (ethan spreads false information and maliciously deletes files on my computer so he can blame it on me)
     if (fp == NULL)
     {
         strcat(fl_name, ".txt");
-        fp = create_edgelist_file(fl_name);
         free(el);
         free(el_recursed);
         return;
     }
     Recursion_helper_stack * rhs = (Recursion_helper_stack *) malloc(sizeof(Recursion_helper_stack));
-<<<<<<< HEAD
-=======
->>>>>>> 0a73154 (undoing ethans stupidity)
-=======
->>>>>>> 955d7f1 (ethan spreads false information and maliciously deletes files on my computer so he can blame it on me)
     if (recursive)
     {
 
         int idx_offset = 0;
-<<<<<<< HEAD
-<<<<<<< HEAD
         init_rhs(rhs);
 
         for (int ii = 0; ii < (int)funcs.func_size; ii++)
@@ -1294,7 +1247,7 @@ void generate_all_edge_lists(IRFuncs &funcs, char* fl_name, int recursive)
             el_recursed[ii].recursed = 1;
             recursively_populate(el, &el_recursed[ii], -1 , ii, &idx_offset, funcs.func_size, rhs, fp);
             el_recursed[ii].num_verts = idx_offset;
-            // sort_EL_quick(&el_recursed[ii], el_recursed[ii].edges);
+
             CSR csr;
             init_CSR(&csr, &el_recursed[ii]);
             color_CSR(&csr);
@@ -1307,25 +1260,7 @@ void generate_all_edge_lists(IRFuncs &funcs, char* fl_name, int recursive)
         fclose(fp);
     }
     cleanup(el, rhs, funcs.func_size);
-<<<<<<< HEAD
-=======
-        Recursion_helper_stack rhs;
-        init_rhs(&rhs);
-        recursively_populate(el, main_idx, &idx_offset, funcs.func_size, &rhs, fp);
-        fclose(fp);
-    }
-
->>>>>>> 0a73154 (undoing ethans stupidity)
-=======
-        init_rhs(rhs);
-        recursively_populate(el, main_idx, &idx_offset, funcs.func_size, rhs, fp);
-        fclose(fp);
-    }
-    cleanup(el, rhs, funcs.func_size);
->>>>>>> 955d7f1 (ethan spreads false information and maliciously deletes files on my computer so he can blame it on me)
-=======
     cleanup(el_recursed, NULL, funcs.func_size);
->>>>>>> fc1d6bb (cleaned up output order of operations)
 }
 
 /*
@@ -1334,7 +1269,7 @@ void generate_all_edge_lists(IRFuncs &funcs, char* fl_name, int recursive)
  */
 void analyze_registers(FILE *fp, char fl_name[], int file_size, int recursive){
 
-    size_t len = 0, block_idx = 2, line_idx = 0;
+    size_t len = 0, block_idx = 2;
     int reg_idx = 0;
     char *line = NULL;
     int in_func = FALSE_, in_block = FALSE_;
@@ -1347,12 +1282,19 @@ void analyze_registers(FILE *fp, char fl_name[], int file_size, int recursive){
     block_map.regs = (Register_mapping*) malloc(num_funcs * sizeof(Register_mapping));
     block_map.func_names = (char*) malloc(num_funcs * sizeof(char) * PATH_MAX);
 
-    new (&block_map.funcs[block_map.func_size]) Function();
-    new (&block_map.regs[block_map.func_size]) Register_mapping();
 
     while (getline(&line, &len, fp) != -1) {
         if (!in_func){
             if (strncmp(line,"define",6) == 0) {
+
+                if (block_map.func_size < (size_t)num_funcs) {
+                    new (&block_map.funcs[block_map.func_size]) Function();
+                    new (&block_map.regs[block_map.func_size]) Register_mapping();
+                } else {
+                    fprintf(stderr, "Exceeded allocated function capacity. Please edit BYTES_PER_FUNCTION\n");
+                    exit(EXIT_FAILURE);
+                }
+
                 in_func = TRUE_;
                 const char * func_tok_ptr = line;
                 long func_tok_len = 0;
@@ -1395,9 +1337,29 @@ void analyze_registers(FILE *fp, char fl_name[], int file_size, int recursive){
         }
 
         if (!in_block){
+
             if (strchr(line, ':') != NULL){
                 in_block = TRUE_;
                 block_idx = atoi(line);
+            }
+
+            if (line[0] == '}'){
+
+                in_func = FALSE_;
+                in_block = FALSE_;
+
+                /* Core liveness tracking. All this will have to change for multiple funcs */
+                compute_use_def_block(block_map.funcs[block_map.func_size],block_map.regs[block_map.func_size], reg_idx);
+                compute_use_def_block_phis(block_map.funcs[block_map.func_size],block_map.regs[block_map.func_size]);
+
+                compute_in_out(block_map.funcs[block_map.func_size], reg_idx);
+
+                /* Here we make the edge list given we have populated all necessary structures */
+
+                block_map.func_size++;
+
+                reg_idx = 0;
+
             }
 
             continue;
@@ -1411,37 +1373,11 @@ void analyze_registers(FILE *fp, char fl_name[], int file_size, int recursive){
                             reg_idx,fp,len);
         in_block = (loc != LINE_TYPE::BRANCH) ? TRUE_ : FALSE_;
 
-        if (line[0] == '}'){
-            line_idx = 0;
-            in_func = FALSE_;
-            in_block = FALSE_;
-
-            /* Core liveness tracking. All this will have to change for multiple funcs */
-            compute_use_def_block(block_map.funcs[block_map.func_size],block_map.regs[block_map.func_size], reg_idx);
-            compute_use_def_block_phis(block_map.funcs[block_map.func_size],block_map.regs[block_map.func_size]);
-
-            compute_in_out(block_map.funcs[block_map.func_size], reg_idx);
-
-            /* Here we make the edge list given we have populated all necessary structures */
-
-            block_map.func_size++;
-
-            new (&block_map.funcs[block_map.func_size]) Function();
-            new (&block_map.regs[block_map.func_size]) Register_mapping();
-            reg_idx = 0;
-
-        } else { line_idx++; }
     }
 
     fclose(fp);
     if (line)
         free(line);
-<<<<<<< HEAD
-    free(block_map.func_names);
-    free(block_map.funcs);
-    free(block_map.regs);
-=======
->>>>>>> 0a73154 (undoing ethans stupidity)
 
     generate_all_edge_lists(block_map, fl_name, recursive);
 
@@ -1456,9 +1392,6 @@ void analyze_registers(FILE *fp, char fl_name[], int file_size, int recursive){
     free(block_map.funcs);
     free(block_map.regs);
 
-
-    /* Not implemented. This program will brick your computer */
-    //free_heap_alloc(block_map);
 }
 
 int main(int argc, char **argv){
@@ -1499,10 +1432,6 @@ int main(int argc, char **argv){
     graph_file_ttl[pathname_len] = '\0';
     strcat(graph_file_ttl,"/output_graph/");
     strncat(graph_file_ttl,last+1,size_noll);
-<<<<<<< HEAD
-    printf("\n\nPROCESSING FILE: %s\n\n", graph_file_ttl);
-=======
->>>>>>> 0a73154 (undoing ethans stupidity)
 
     analyze_registers(fp,graph_file_ttl ,size, 1);
 

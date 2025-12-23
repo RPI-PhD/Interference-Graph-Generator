@@ -2,13 +2,8 @@
 TIMEOUT_SECONDS=30
 
 GEN_EXE="$1"
-<<<<<<< HEAD
-GEN_EXE="$1"
-IR_FILES=("$@")
-=======
 shift
 
->>>>>>> 72de1ec (Fixed makefile)
 gen_count=$#
 fail_count=0
 failed_gens=""
