@@ -4,7 +4,7 @@
 
 Haven Cook, Andrew Erickson, Ethan Rapa
 
-![](Reports%20and%20Slides/Final%20Report/figures/Workflow.png)
+![](Reports_and_Slides/Final_Report/figures/Workflow.png)
 
 
 ## <u>Important Content</u>
