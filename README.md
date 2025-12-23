@@ -50,3 +50,4 @@ The provided Makefile is self-contained, and will compile the executable, then c
 * Implement ninja build system for large datasets
 * Add flags for generating statistics + coloring to speed up (separate into methods & use #IFDEF)
 * Add flag for automatically running python visualizer
+* Website where you can drag + drop then get returned a zip file?
