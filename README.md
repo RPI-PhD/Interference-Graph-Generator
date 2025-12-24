@@ -2,11 +2,11 @@
 
 #### Large-scale LLVM-based interference graph generation for graph coloring
 
-![](Reports_and_Slides/Final_Report/figures/Workflow.png)
+![](docs/Reports_and_Slides/Final_Report/figures/Workflow.png)
 
 
 ## <u>Important Content</u>
-#### << *[Read the Full Paper](Reports_and_Slides/Final_Report/DLOG_final_report.pdf)*
+#### << *[Read the Full Paper](docs/Reports_and_Slides/Final_Report/DLOG_final_report.pdf)*
 #### << *[Graph Generator](IG_Gen/generate_IR.cpp)*
 #### << *[Sample Large Dataset](IG_Gen/DATASETv2)*
 
