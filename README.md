@@ -45,9 +45,13 @@ The provided Makefile is self-contained, and will compile the executable, then c
 
 ### <u>TODO</u>
 
-* Move methods to their own implementation files
-* Once the new file hierarchy is ironed out, edit makefile to work with that
+* ~~Move methods to their own implementation files~~
+* ~~Once the new file hierarchy is ironed out, edit makefile to work with that~~
 * Implement ninja build system for large datasets
-* Add flags for generating statistics + coloring to speed up (separate into methods & use #IFDEF)
+* ~~Add flags for generating statistics + coloring to speed up~~ (separate into methods & use #IFDEF)
+  * Partially completed, still need to ensure functionality, eliminate redundancy, and streamline the flag setting process
+  * Fix python script to account for the non recursed output
+* Optimize basically everything
+* Address completeness issues (look into LLVM documentation to ensure every keyword/case is covered)
 * Add flag for automatically running python visualizer
 * Website where you can drag + drop then get returned a zip file?

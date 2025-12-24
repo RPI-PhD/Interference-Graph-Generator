@@ -1,0 +1,64 @@
+# Function: /home/haven/RPI_PHD/courses/dlog/Interference-Graph-Generator/data/output_graph/parser-mem2reg_token_list_free.txt
+# |V| = 16 [0, 15]
+# |E| = 55
+# CHI = 5
+# max_degree = 16
+# avg_degree = 6.875000
+# Number of unexpanded functions: 0, listed last
+
+e 0 15
+e 2 15
+e 4 15
+e 7 15
+e 0 14
+e 2 14
+e 4 14
+e 7 14
+e 0 12
+e 2 12
+e 4 12
+e 7 12
+e 0 11
+e 2 11
+e 4 11
+e 7 11
+e 0 10
+e 2 10
+e 4 10
+e 7 10
+e 9 10
+e 0 9
+e 2 9
+e 4 9
+e 7 9
+e 0 8
+e 2 8
+e 4 8
+e 7 8
+e 0 7
+e 2 7
+e 4 7
+e 0 6
+e 2 6
+e 4 6
+e 7 6
+e 0 5
+e 2 5
+e 4 5
+e 7 5
+e 0 4
+e 2 4
+e 7 4
+e 0 13
+e 2 13
+e 4 13
+e 7 13
+e 0 3
+e 2 3
+e 4 3
+e 7 3
+e 0 1
+e 2 1
+e 4 1
+e 7 1
+

@@ -403,10 +403,9 @@ void generate_all_edge_lists(IRFuncs &funcs, char* fl_name, int recursive, int c
         free(el_recursed);
         return;
     }
-    Recursion_helper_stack * rhs = (Recursion_helper_stack *) malloc(sizeof(Recursion_helper_stack));
     if (recursive)
     {
-
+        Recursion_helper_stack * rhs = (Recursion_helper_stack *) malloc(sizeof(Recursion_helper_stack));
         int idx_offset = 0;
         init_rhs(rhs);
 
@@ -429,9 +428,10 @@ void generate_all_edge_lists(IRFuncs &funcs, char* fl_name, int recursive, int c
             idx_offset = 0;
         }
         fclose(fp);
+        cleanup(el_recursed, rhs, funcs.func_size);
     }
-    cleanup(el, rhs, funcs.func_size);
-    cleanup(el_recursed, NULL, funcs.func_size);
+    else free(el_recursed);
+    cleanup(el, NULL, funcs.func_size);
 }
 
 void cleanup(Edge_list_funcs * el_list, Recursion_helper_stack * rhs, int numfuncs)
@@ -446,7 +446,8 @@ void cleanup(Edge_list_funcs * el_list, Recursion_helper_stack * rhs, int numfun
         free(el_list[i].edges);
         free(el_list[i].func_name);
     }
-    if (rhs != NULL) free(rhs->helper);
     free(el_list);
+    if (rhs == NULL) return;
+    free(rhs->helper);
     free(rhs);
 }
