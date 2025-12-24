@@ -87,7 +87,7 @@ def compute_stats(folder, color : bool):
     graph_types = {"Independent Sets": indep_graph,
                    "Recursive Interference Sets": rec_graph}
 
-    axes_flat = axes_flat2 = axes_flat3 = {None for x in range(len(graph_types))}
+    axes_flat = axes_flat2 = axes_flat3 = list(range(len(graph_types)))
 
     fig, axes = plt.subplots(nrows=len(graph_types), ncols=1, figsize=(10, 6))
     axes_flat = axes.flatten()

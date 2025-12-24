@@ -8,7 +8,7 @@ CXX = g++
 override CXXFLAGS := -std=c++17 -Wall -Werror -Wextra -fsanitize=address -pedantic -g $(CXXFLAGS)
 
 #INP_DIR = data/DATASETv2
-FLAGS = ""
+FLAGS =
 IR_DIR  = data/LLVM_IR
 OUT_DIR = data/output_graph
 
@@ -61,7 +61,7 @@ $(PY_ENV_STAMP): $(PY_ENV)
 pyenv: $(PY_ENV_STAMP)
 
 run_py: $(PY_ENV_STAMP) $(PY_SCRIPT)
-	@conda run -n $(PY_ENV_NAME) python $(PY_SCRIPT) $(OUT_DIR) $(FLAGS)
+	@conda run -n $(PY_ENV_NAME) python $(PY_SCRIPT) $(OUT_DIR) "$(FLAGS)"
 
 run: genfiles $(OUTPUT_FILES)
 
