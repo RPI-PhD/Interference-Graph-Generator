@@ -2,7 +2,7 @@
 // Created by haven on 12/23/25.
 //
 
-#include "aligned_realloc.h"
+#include "../include/aligned_realloc.h"
 
 bool is_aligned(void* ptr, size_t alignment)
 {

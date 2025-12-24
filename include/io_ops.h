@@ -1,12 +1,15 @@
-//
-// Created by haven on 12/23/25.
-//
-
 #ifndef INTERFERENCE_GRAPH_GENERATOR_IO_OPS_H
 #define INTERFERENCE_GRAPH_GENERATOR_IO_OPS_H
-#include <stdio.h>
+
 #include "graph_algs.h"
 
+typedef struct
+{
+    int recursive;
+    int coloring;
+} Flags;
+
+void parse_args(Flags* flags, const char *arg);
 
 FILE *create_edgelist_file(char fl_name[]);
 

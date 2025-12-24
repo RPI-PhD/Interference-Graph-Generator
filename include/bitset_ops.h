@@ -1,13 +1,7 @@
-//
-// Created by haven on 12/23/25.
-//
-
 #ifndef INTERFERENCE_GRAPH_GENERATOR_BITSET_OPS_H
 #define INTERFERENCE_GRAPH_GENERATOR_BITSET_OPS_H
 
-#include <string.h>
-#include <stdlib.h>
-#include <sys/types.h>
+#include "master.h"
 
 typedef u_int64_t BITSIZE;
 

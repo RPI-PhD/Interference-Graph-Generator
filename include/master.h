@@ -1,0 +1,12 @@
+#ifndef INTERFERENCE_GRAPH_GENERATOR_MASTER_H
+#define INTERFERENCE_GRAPH_GENERATOR_MASTER_H
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <unordered_map>
+#include <regex>
+#include <iostream>
+#include <climits>
+#include <unistd.h>
+#include <sys/stat.h>
+#endif //INTERFERENCE_GRAPH_GENERATOR_MASTER_H

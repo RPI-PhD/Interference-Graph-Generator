@@ -8,6 +8,7 @@ CXX = g++
 override CXXFLAGS := -std=c++17 -Wall -Werror -Wextra -fsanitize=address -pedantic -g $(CXXFLAGS)
 
 #INP_DIR = data/DATASETv2
+FLAGS = ""
 IR_DIR  = data/LLVM_IR
 OUT_DIR = data/output_graph
 
@@ -22,7 +23,7 @@ IR_FILES := $(INP_FILES:$(INP_DIR)/%.c=$(IR_DIR)/%-mem2reg.ll)
 
 OUTPUT_FILES := $(IR_FILES:$(IR_DIR)/%-mem2reg.ll=$(OUT_DIR)/%-mem2reg.txt)
 
-FILES = aligned_realloc bitset_ops generate_IR graph_algs io_ops state_machine
+FILES = aligned_realloc init bitset_ops generate_IR graph_algs io_ops state_machine main
 SRCS := $(addsuffix .cpp,$(FILES))
 SRCS := $(addprefix src/,$(SRCS))
 OBJS := $(addsuffix .o,$(FILES))
@@ -50,7 +51,7 @@ $(IR_DIR)/%-mem2reg.ll: $(INP_DIR)/%.c | dirs
 genfiles: $(IR_FILES)
 
 $(OUT_DIR)/%-mem2reg.txt: $(IR_DIR)/%-mem2reg.ll $(TARGET) | dirs
-	/bin/bash build/run_generator.sh "$(GEN_EXE)" $<
+	/bin/bash build/run_generator.sh "$(GEN_EXE)" $< "$(FLAGS)"
 
 $(PY_ENV_STAMP): $(PY_ENV)
 	@conda env update -n $(PY_ENV_NAME) -f $(PY_ENV) --prune || \
@@ -60,7 +61,7 @@ $(PY_ENV_STAMP): $(PY_ENV)
 pyenv: $(PY_ENV_STAMP)
 
 run_py: $(PY_ENV_STAMP) $(PY_SCRIPT)
-	@conda run -n $(PY_ENV_NAME) python $(PY_SCRIPT) $(OUT_DIR)
+	@conda run -n $(PY_ENV_NAME) python $(PY_SCRIPT) $(OUT_DIR) $(FLAGS)
 
 run: genfiles $(OUTPUT_FILES)
 

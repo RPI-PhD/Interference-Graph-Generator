@@ -1,13 +1,8 @@
-//
-// Created by haven on 12/23/25.
-//
-
 #ifndef INTERFERENCE_GRAPH_GENERATOR_GRAPH_ALGS_H
 #define INTERFERENCE_GRAPH_GENERATOR_GRAPH_ALGS_H
 
-#include <stdio.h>
-#include "aligned_realloc.h"
-#include "generate_IR.h"
+#include "master.h"
+#include "init.h"
 
 
 typedef struct

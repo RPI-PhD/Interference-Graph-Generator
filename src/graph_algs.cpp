@@ -2,8 +2,9 @@
 // Created by haven on 12/23/25.
 //
 
-#include "graph_algs.h"
-#include "io_ops.h"
+#include "../include/graph_algs.h"
+#include "../include/io_ops.h"
+#include "../include/aligned_realloc.h"
 
 void init_rhs(Recursion_helper_stack * rhs)
 {
@@ -37,6 +38,8 @@ void init_EL(Edge_list_funcs * el, char * name)
     el->func_alloc = 2;
     el->calls = (Func_vertex *)malloc(sizeof(Func_vertex) * el->func_alloc);
     el->recursed = 0;
+    el->max_degree = 0;
+    el->avg_degree = 0;
 }
 
 void copy_EL(Edge_list_funcs * dst, Edge_list_funcs * src)
@@ -51,6 +54,8 @@ void copy_EL(Edge_list_funcs * dst, Edge_list_funcs * src)
     dst->num_funcs = 0;
     dst->func_alloc = 2;
     dst->calls = (Func_vertex *)malloc(sizeof(Func_vertex) * dst->func_alloc);
+    dst->max_degree = src->max_degree;
+    dst->chi = src->chi;
 }
 
 void add_edge(Edge_list_funcs * el, int u, int v)
@@ -146,7 +151,6 @@ void init_CSR(CSR * csr, Edge_list_funcs * el)
     csr->edges = el->num_edges;
     csr->verts = el->num_verts;
     csr->max_degree = 0;
-    int avg_degree_int = 0;
     csr->chi = 0;
     csr->adjlist = (unsigned int *) malloc(sizeof(unsigned int) * el->num_edges * 2);
     csr->offsets = (unsigned int *) malloc(sizeof(unsigned int) * (el->num_verts + 1));
@@ -162,9 +166,8 @@ void init_CSR(CSR * csr, Edge_list_funcs * el)
     {
         csr->offsets[i] = deg[i-1] + csr->offsets[i-1];
         csr->max_degree = deg[i-1] > csr->max_degree ? deg[i-1] : csr->max_degree;
-        avg_degree_int += deg[i-1];
     }
-    csr->avg_degree = (float)avg_degree_int / (float)csr->verts;
+    csr->avg_degree = (float)csr->edges / (float)csr->verts;
     el->avg_degree = csr->avg_degree;
     el->max_degree = csr->max_degree;
 
@@ -374,11 +377,7 @@ void generate_all_edge_lists(IRFuncs &funcs, char* fl_name, int recursive, int c
         char * funcname = funcs.func_names + ii * PATH_MAX;
         init_EL(el + ii, funcname);
         (el + ii)->num_verts = funcs.regs[ii].size();
-        if (!recursive)
-        {
-            fp = create_edgelist_file(funcname);
-        }
-        else if (ii == 0)
+        if (ii == 0)
         {
             strcat(fl_name, ".txt");
             fp = create_edgelist_file(fl_name);
@@ -393,8 +392,12 @@ void generate_all_edge_lists(IRFuncs &funcs, char* fl_name, int recursive, int c
             verify_colors(&csr, &el[ii]);
             free_CSR(&csr);
         }
+        else
+        {
+            el[ii].avg_degree = (float) el[ii].num_edges / (float) el[ii].num_verts;
+            el[ii].chi = 0;
+        }
         print_el_to_file(fp, el[ii]);
-        if (!recursive) fclose(fp);
     }
     if (fp == NULL)
     {
@@ -424,13 +427,18 @@ void generate_all_edge_lists(IRFuncs &funcs, char* fl_name, int recursive, int c
                 verify_colors(&csr, &el_recursed[ii]);
                 free_CSR(&csr);
             }
+            else
+            {
+                el_recursed[ii].avg_degree = (float) el_recursed[ii].num_edges / (float) el_recursed[ii].num_verts;
+                el_recursed[ii].chi = 0;
+            }
             print_el_to_file(fp, el_recursed[ii]);
             idx_offset = 0;
         }
-        fclose(fp);
         cleanup(el_recursed, rhs, funcs.func_size);
     }
     else free(el_recursed);
+    fclose(fp);
     cleanup(el, NULL, funcs.func_size);
 }
 
@@ -451,3 +459,4 @@ void cleanup(Edge_list_funcs * el_list, Recursion_helper_stack * rhs, int numfun
     free(rhs->helper);
     free(rhs);
 }
+

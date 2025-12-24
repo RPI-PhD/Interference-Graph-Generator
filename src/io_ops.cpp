@@ -2,7 +2,27 @@
 // Created by haven on 12/23/25.
 //
 
-#include "io_ops.h"
+#include "../include/io_ops.h"
+
+void parse_args(Flags* flags, const char *arg)
+{
+    if (arg == NULL || flags == NULL) return;
+    if (*arg != '-') return;
+    for (; *arg != '\0'; arg++)
+    {
+        switch (*arg)
+        {
+        case 'r':
+            flags->recursive = TRUE_;
+            break;
+        case 'c':
+            flags->coloring = TRUE_;
+            break;
+        default:
+            break;
+        }
+    }
+}
 
 FILE *create_edgelist_file(char fl_name[]){
     FILE *fp;

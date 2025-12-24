@@ -3,6 +3,7 @@ import sys
 import pandas as pd
 import matplotlib.pyplot as plt
 import os
+import argparse
 
 def get_per_file_data(file, indep_graph, rec_graph):
 
@@ -42,7 +43,31 @@ def grab_all_file_nums(folder, indep_graph, rec_graph):
         if os.path.isfile(full_path):
             get_per_file_data(full_path,indep_graph,rec_graph)
 
-def compute_stats(folder):
+def parse_args():
+    parser = argparse.ArgumentParser(description="Arguments for recursion and coloring IG")
+
+    parser.add_argument(
+        "input",
+        help="Interference Graph txt file"
+    )
+
+    parser.add_argument(
+        "-r", "--recursive",
+        action="store_true",
+        help="Enable recursive caller–callee expansion"
+    )
+
+    parser.add_argument(
+        "-c", "--color",
+        action="store_true",
+        help="Enable graph coloring"
+    )
+
+    args = parser.parse_args()
+
+    return args
+
+def compute_stats(folder, color : bool):
 
     # __store pattern__
 
@@ -62,16 +87,19 @@ def compute_stats(folder):
     graph_types = {"Independent Sets": indep_graph,
                    "Recursive Interference Sets": rec_graph}
 
+    axes_flat = axes_flat2 = axes_flat3 = {None for x in range(len(graph_types))}
 
     fig, axes = plt.subplots(nrows=len(graph_types), ncols=1, figsize=(10, 6))
-
-    fig2, axes2 = plt.subplots(nrows=len(graph_types), ncols=1, figsize=(10, 6))
-
-    fig3, axes3 = plt.subplots(nrows=len(graph_types), ncols=1, figsize=(10, 6))
-
     axes_flat = axes.flatten()
-    axes_flat2 = axes2.flatten()
-    axes_flat3 = axes3.flatten()
+
+    if color:
+
+        fig2, axes2 = plt.subplots(nrows=len(graph_types), ncols=1, figsize=(10, 6))
+
+        fig3, axes3 = plt.subplots(nrows=len(graph_types), ncols=1, figsize=(10, 6))
+
+        axes_flat2 = axes2.flatten()
+        axes_flat3 = axes3.flatten()
 
     for (key,value), ax, ax2, ax3 in zip(graph_types.items(), axes_flat, axes_flat2, axes_flat3):
         df = pd.DataFrame.from_dict(value,orient='index')
@@ -84,23 +112,26 @@ def compute_stats(folder):
         ax.set_xlabel('|E| / |V|')
         ax.set_ylabel('Graph Frequency')
 
-        ax2.hist(df[3],bins=30, color='skyblue', edgecolor='black')
-        ax2.set_title(key + f" Comparison of Chromatic Number Across Functions | μ({mn:.2f} ± {stddev:.2f})")
-        ax2.set_xlabel('Chromatic Number')
-        ax2.set_ylabel('Graph Frequency')
+        if color:
+            ax2.hist(df[3],bins=30, color='skyblue', edgecolor='black')
+            ax2.set_title(key + f" Comparison of Chromatic Number Across Functions | μ({mn:.2f} ± {stddev:.2f})")
+            ax2.set_xlabel('Chromatic Number')
+            ax2.set_ylabel('Graph Frequency')
 
-        ax3.hist(df[1] / df[3], bins=30, color='skyblue', edgecolor='black')
-        ax3.set_title(key + f" Comparison of Edges per Chromatic Number Across Functions | μ({mn:.2f} ± {stddev:.2f})")
-        ax3.set_xlabel('Edges per Chromatic Number')
-        ax3.set_ylabel('Graph Frequency')
+            ax3.hist(df[1] / df[3], bins=30, color='skyblue', edgecolor='black')
+            ax3.set_title(key + f" Comparison of Edges per Chromatic Number Across Functions | μ({mn:.2f} ± {stddev:.2f})")
+            ax3.set_xlabel('Edges per Chromatic Number')
+            ax3.set_ylabel('Graph Frequency')
 
     fig.tight_layout()
-    fig2.tight_layout()
-    fig3.tight_layout()
+
+    if color:
+        fig2.tight_layout()
+        fig3.tight_layout()
 
     plt.show()
 
-if len(sys.argv) != 2:
-    print("PYTHON ERROR: incorrect arguments\n")
+flgs = parse_args()
 
-compute_stats(sys.argv[1])
+# file_name, color_enabled
+compute_stats(flgs.input, flgs.color)

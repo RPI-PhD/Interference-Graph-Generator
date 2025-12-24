@@ -2,9 +2,7 @@
 // Created by haven on 12/23/25.
 //
 
-#include "bitset_ops.h"
-
-#include <stdlib.h>
+#include "../include/bitset_ops.h"
 
 /*
  * Helper bitwise funcs
