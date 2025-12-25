@@ -68,6 +68,7 @@ typedef struct {
 
 } Block;  // TODO: This became really big and should probably be broken into multiple structs (bitstruct, successor struct, etc)
 
+// Keep around for now just in case we want to profile
 // typedef std::unordered_map<size_t, Block> Function;
 // typedef std::unordered_map<std::string, int> Register_mapping;
 
