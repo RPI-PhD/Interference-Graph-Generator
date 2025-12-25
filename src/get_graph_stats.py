@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import os
 import argparse
 
+EPSILON = 1.0e-9
 def get_per_file_data(file, indep_graph, rec_graph):
 
     is_rec : bool = False
@@ -28,10 +29,12 @@ def get_per_file_data(file, indep_graph, rec_graph):
             num_unex = int(next(f,None).split(":", 1)[1].strip().split()[0][0])
 
             # Keep track of this table pattern
-            value = (V, E, E / (V + 1e-9), CHI, mex_deg, avg_deg, num_unex)
+            # If CHI is 0, you have a bigger problem than divide by 0, but will add epsilon anyways and can notice outrageous plots
+            value = (V, E, E / (V + EPSILON), CHI + EPSILON, mex_deg, avg_deg, num_unex)
 
             if is_rec:
                 rec_graph[file + cur_func] = value
+
             else:
                 indep_graph[file + cur_func] = value
 
@@ -87,7 +90,7 @@ def compute_stats(folder, color : bool):
     graph_types = {"Independent Sets": indep_graph,
                    "Recursive Interference Sets": rec_graph}
 
-    axes_flat = axes_flat2 = axes_flat3 = list(range(len(graph_types)))
+    axes_flat2 = axes_flat3 = list(range(len(graph_types)))
 
     fig, axes = plt.subplots(nrows=len(graph_types), ncols=1, figsize=(10, 6))
     axes_flat = axes.flatten()

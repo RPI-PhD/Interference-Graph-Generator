@@ -8,7 +8,7 @@ CXX = g++
 override CXXFLAGS := -std=c++17 -Wall -Werror -Wextra -fsanitize=address -pedantic -g $(CXXFLAGS)
 
 #INP_DIR = data/DATASETv2
-FLAGS =
+FLAGS = -rc
 IR_DIR  = data/LLVM_IR
 OUT_DIR = data/output_graph
 
@@ -72,7 +72,9 @@ clean:
 	rm -f build/*.o *~ $(TARGET)
 
 clean_ll: clean
-	rm -f $(IR_DIR)/*.ll
+	rm -f $(IR_DIR)/*
 
 clean_full: clean_ll
-	rm -f $(OUTPUT_FILES)
+	rm -f $(OUT_DIR)/*
+
+clean_fullwpy: clean_full clean_pyenv

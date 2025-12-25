@@ -1,10 +1,6 @@
 
 #include "../include/generate_IR.h"
 
-/*
- * Other methods
- */
-
 void compute_use_def_block(Function &blocks, const Register_mapping &regMap, const int num_regs){
 
     int reg_ID;
