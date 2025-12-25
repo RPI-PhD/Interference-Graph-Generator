@@ -70,7 +70,7 @@ def parse_args():
 
     return args
 
-def compute_stats(folder, color : bool):
+def compute_stats(folder, color : bool, recursive : bool):
 
     # __store pattern__
 
@@ -87,19 +87,22 @@ def compute_stats(folder, color : bool):
 
     grab_all_file_nums(folder,indep_graph,rec_graph)
 
-    graph_types = {"Independent Sets": indep_graph,
-                   "Recursive Interference Sets": rec_graph}
+    if recursive:
+        graph_types = {"Independent Sets": indep_graph,
+                       "Recursive Interference Sets": rec_graph}
+    else:
+        graph_types = {"Independent Sets": indep_graph}
 
     axes_flat2 = axes_flat3 = list(range(len(graph_types)))
 
-    fig, axes = plt.subplots(nrows=len(graph_types), ncols=1, figsize=(10, 6))
+    fig, axes = plt.subplots(nrows=len(graph_types), ncols=1, figsize=(10, 6), squeeze=False)
     axes_flat = axes.flatten()
 
     if color:
 
-        fig2, axes2 = plt.subplots(nrows=len(graph_types), ncols=1, figsize=(10, 6))
+        fig2, axes2 = plt.subplots(nrows=len(graph_types), ncols=1, figsize=(10, 6), squeeze=False)
 
-        fig3, axes3 = plt.subplots(nrows=len(graph_types), ncols=1, figsize=(10, 6))
+        fig3, axes3 = plt.subplots(nrows=len(graph_types), ncols=1, figsize=(10, 6), squeeze=False)
 
         axes_flat2 = axes2.flatten()
         axes_flat3 = axes3.flatten()
@@ -137,4 +140,4 @@ def compute_stats(folder, color : bool):
 flgs = parse_args()
 
 # file_name, color_enabled
-compute_stats(flgs.input, flgs.color)
+compute_stats(flgs.input, flgs.color, flgs.recursive)
