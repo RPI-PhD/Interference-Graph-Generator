@@ -6,7 +6,7 @@ void compute_use_def_block(Function &blocks, const Register_mapping &regMap, con
     int reg_ID;
     size_t reg, i;
 
-    for (std::pair<const size_t,Block> &block : blocks){
+    for (Function::value_type &block : blocks){
 
         Block *bl = &block.second;
 
@@ -40,7 +40,7 @@ void compute_use_def_block_phis(Function &blocks,Register_mapping &regMap){
 
     Block *pred_block;
 
-    for (std::pair<const size_t,Block> &block : blocks){
+    for (Function::value_type &block : blocks){
 
         Block *bl = &block.second;
 
@@ -71,7 +71,7 @@ void compute_in_out(Function &blocks, int num_regs){
     init_bits(&out_copy,num_regs);
     init_bits(&tmp,num_regs);
 
-    for (std::pair<const size_t,Block> &block : blocks){
+    for (Function::value_type &block : blocks){
         Block *bl = &block.second;
 
         init_bits(&bl->in_block,num_regs);
@@ -83,7 +83,7 @@ void compute_in_out(Function &blocks, int num_regs){
 
         in_diff = out_diff = FALSE_;
 
-        for (std::pair<const size_t,Block> &block : blocks){
+        for (Function::value_type &block : blocks){
 
             Block *bl = &block.second;
             bitReg *in = &bl->in_block;
@@ -117,7 +117,7 @@ void compute_in_out(Function &blocks, int num_regs){
 }
 
 void free_heap_alloc(Function &blocks){
-    for (std::pair<const size_t,Block> &block : blocks){
+    for (Function::value_type &block : blocks){
 
         Block *bl = &block.second;
 
@@ -160,6 +160,10 @@ void analyze_registers(FILE *fp, char fl_name[], int file_size, int recursive, i
                 if (block_map.func_size < (size_t)num_funcs) {
                     new (&block_map.funcs[block_map.func_size]) Function();
                     new (&block_map.regs[block_map.func_size]) Register_mapping();
+
+                    block_map.funcs[block_map.func_size].reserve(MAX_NUM_BLOCKS); // This is really dumb | TODO: We really need to speed up + make hashing safe
+                    block_map.regs[block_map.func_size].reserve(MAX_NUM_REGS);
+
                 } else {
                     fprintf(stderr, "Exceeded allocated function capacity. Please edit BYTES_PER_FUNCTION\n");
                     exit(EXIT_FAILURE);

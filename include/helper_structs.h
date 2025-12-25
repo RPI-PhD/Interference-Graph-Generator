@@ -14,6 +14,8 @@
 #define MAX_ID_NAME_LEN         50
 #define BYTES_PER_FUNCTION      50
 #define MAX_PREDECESSORS        10
+#define MAX_NUM_BLOCKS          512
+#define MAX_NUM_REGS            2048
 
 
 /*
@@ -66,8 +68,11 @@ typedef struct {
 
 } Block;  // TODO: This became really big and should probably be broken into multiple structs (bitstruct, successor struct, etc)
 
-typedef std::unordered_map<size_t, Block> Function;
-typedef std::unordered_map<std::string, int> Register_mapping;
+// typedef std::unordered_map<size_t, Block> Function;
+// typedef std::unordered_map<std::string, int> Register_mapping;
+
+typedef ankerl::unordered_dense::map<size_t, Block> Function;
+typedef ankerl::unordered_dense::map<std::string, int> Register_mapping;
 
 typedef struct {
     size_t func_size;

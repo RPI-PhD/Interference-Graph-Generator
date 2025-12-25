@@ -234,7 +234,7 @@ void generate_edge_list(Function &blocks,
     bitReg Live;
     init_bits(&Live, num_regs);
 
-    for (std::pair<const size_t,Block> &block : blocks){
+    for (Function::value_type &block : blocks){
 
         bl = &block.second;
         out = &bl->out_block;

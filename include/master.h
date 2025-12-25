@@ -9,4 +9,5 @@
 #include <climits>
 #include <unistd.h>
 #include <sys/stat.h>
+#include <ankerl/unordered_dense.h>
 #endif //INTERFERENCE_GRAPH_GENERATOR_MASTER_H

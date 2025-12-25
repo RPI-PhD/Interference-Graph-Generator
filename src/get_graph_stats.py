@@ -139,5 +139,5 @@ def compute_stats(folder, color : bool, recursive : bool):
 
 flgs = parse_args()
 
-# file_name, color_enabled
+# file_name, color_enabled/disabled, recursion_enabled/disabled
 compute_stats(flgs.input, flgs.color, flgs.recursive)
