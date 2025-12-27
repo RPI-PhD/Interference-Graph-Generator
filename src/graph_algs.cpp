@@ -438,6 +438,7 @@ void generate_all_edge_lists(IRFuncs &funcs, char* fl_name, int recursive, int c
         cleanup(el_recursed, rhs, funcs.func_size);
     }
     else free(el_recursed);
+
     fclose(fp);
     cleanup(el, NULL, funcs.func_size);
 }

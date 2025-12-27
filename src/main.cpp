@@ -51,6 +51,7 @@ int main(int argc, char **argv){
 
     free(flags);
 
+
     return EXIT_SUCCESS;
 
 }
