@@ -3,11 +3,10 @@
 
 #include "graph_algs.h"
 
-#define BUF_SIZE 0x0000
+#define BUF_SIZE 0x100000
 
 static char BUFFER[BUF_SIZE];
 static size_t write_siz = 0;
-
 
 typedef struct
 {
@@ -47,5 +46,6 @@ static inline void write_chars(FILE *fp, const char *wstring, size_t len_str){
     }
 
 }
+
 
 #endif //INTERFERENCE_GRAPH_GENERATOR_IO_OPS_H

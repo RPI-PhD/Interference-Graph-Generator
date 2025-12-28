@@ -146,6 +146,7 @@ void analyze_registers(FILE *fp, char fl_name[], int file_size, int recursive, i
     LINE_TYPE loc;
     int num_funcs = file_size / BYTES_PER_FUNCTION;
     IRFuncs block_map;
+    int res_len;
 
     block_map.func_size = 0;
     block_map.funcs = (Function*) malloc(num_funcs * sizeof(Function));
@@ -193,11 +194,8 @@ void analyze_registers(FILE *fp, char fl_name[], int file_size, int recursive, i
 
                 char * nameptr = block_map.func_names + PATH_MAX * block_map.func_size;
 
-                snprintf(nameptr, PATH_MAX,
-                         "%.*s",
-                         (int) func_tok_len - 1,
-                         func_tok_ptr + 1);
-
+                memcpy(nameptr, func_tok_ptr + 1, ((func_tok_len >= PATH_MAX) ? PATH_MAX : func_tok_len) - 1);  // This is gross | TODO: fix | maybe don't close file and don't copy
+                nameptr[func_tok_len] = '\0';
 
             } else { continue; }
         }

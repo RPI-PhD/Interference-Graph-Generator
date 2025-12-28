@@ -137,6 +137,7 @@ void compute_use_def_instr(const char *line,
     int *predecessors;
     long tok_len;
     const char *eq, *rhs, *lhs, *token, *callcheck;
+    int res_len;
     Instruct *instr;
     Phi *phis;
 
@@ -177,7 +178,9 @@ void compute_use_def_instr(const char *line,
     token = reg_machine(token,tok_len);
     for (; token != NULL && token < lhs; token = reg_machine(++token,tok_len)){
 
-        snprintf(block->instrcts[instr_idx].def[*sz_def], tok_len + 1,"%.*s",(int)tok_len,token);
+        memcpy(block->instrcts[instr_idx].def[*sz_def], token, tok_len);
+        block->instrcts[instr_idx].def[*sz_def][tok_len] = '\0';
+
         std::string map_token(block->instrcts[instr_idx].def[*sz_def],tok_len);
 
         if (regMap.find(map_token) == regMap.end()){
@@ -203,10 +206,10 @@ void compute_use_def_instr(const char *line,
                 continue;
             }
 
-            snprintf(phis->use[*num_pred], tok_len + 1,"%.*s",(int)tok_len,token);
+            memcpy(phis->use[*num_pred], token, tok_len);
+            phis->use[*num_pred][tok_len] = '\0';
 
             token = phi_machine(token,tok_len);
-
             predecessors[*num_pred] = atoi(token + 1);
 
             (*num_pred)++;
@@ -220,7 +223,10 @@ void compute_use_def_instr(const char *line,
 
         token = reg_machine(token,tok_len);
         for (; token != NULL; token = reg_machine(++token,tok_len)){
-            snprintf(block->instrcts[instr_idx].use[*sz_use], tok_len + 1,"%.*s",(int)tok_len,token);
+
+            memcpy(block->instrcts[instr_idx].use[*sz_use], token, tok_len);
+            block->instrcts[instr_idx].use[*sz_use][tok_len] = '\0';
+
             std::string map_token(block->instrcts[instr_idx].use[*sz_use],tok_len);
 
             if (regMap.find(map_token) == regMap.end()){
@@ -245,6 +251,7 @@ void compute_successors(const char *line,
     const char *p;
     size_t instr_idx;
     size_t original_num_succ, old_succ_len;
+    int succ_label, i;
 
     instr_idx = block->num_instr - 1;
 
@@ -282,14 +289,20 @@ void compute_successors(const char *line,
 
     for (; tok_ptr != NULL; tok_ptr = reg_machine(++tok_ptr, tok_len)){
 
-        snprintf(token, tok_len + 1, "%s", tok_ptr);
-        p = token;
+        memcpy(token, tok_ptr, tok_len);
+        token[tok_len] = '\0';
 
         /* I'm assuming it will always be "label %{register}",
          * so walk back 6 steps and check for "label " */
 
         if (tok_ptr - 6 >= line && strncmp(tok_ptr - 6,"label ",6) == 0) {
-            block->successors[original_num_succ] = atoi(p + 1);
+
+            succ_label = 0;
+            for (i = 1; i < tok_len; ++i){
+                succ_label = succ_label * 10 + (int)(tok_ptr[i] - '0');
+            }
+
+            block->successors[original_num_succ] = succ_label;
             original_num_succ++;
         }
         else {
@@ -297,12 +310,12 @@ void compute_successors(const char *line,
             block->instrcts[instr_idx].size_use++;
             size_t sz = block->instrcts[instr_idx].size_use;
 
-            if (regMap.find(p) == regMap.end()){
-                regMap[p] = reg_idx;
+            if (regMap.find(token) == regMap.end()){
+                regMap[token] = reg_idx;
 
                 reg_idx++;
             }
-            strcpy(block->instrcts[instr_idx].use[sz - 1],p);
+            strcpy(block->instrcts[instr_idx].use[sz - 1],token);
 
         }
     }

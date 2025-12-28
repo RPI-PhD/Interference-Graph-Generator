@@ -346,7 +346,7 @@ void recursively_populate(Edge_list_funcs * el_list, Edge_list_funcs * el, int p
 
         if (next == -1 || func_idx == prev_idx)
         {
-            // if the function's graph isnt known (i.e. dlls), all we can do is drop the label and its interferences
+            // if the function's graph isn't known (i.e. dlls), all we can do is drop the label and its interferences
             add_func(el, el_list[func_idx].calls[i].func_id, el_list[func_idx].calls[i].num_connections);
             for (int j = 0; j < el_list[func_idx].calls[i].num_connections; ++j){
                 el->calls[el->num_funcs-1].neighbors[j] = el_list[func_idx].calls[i].neighbors[j] + myoffset;
@@ -439,7 +439,9 @@ void generate_all_edge_lists(IRFuncs &funcs, char* fl_name, int recursive, int c
     }
     else free(el_recursed);
 
+    flushBuffer(fp);
     fclose(fp);
+
     cleanup(el, NULL, funcs.func_size);
 }
 

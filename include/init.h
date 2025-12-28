@@ -2,6 +2,34 @@
 #define INTERFERENCE_GRAPH_GENERATOR_INIT_H
 
 #include "helper_structs.h"
+#include <fmt/core.h>
+
+
+
+#if defined(__has_include) && __has_include(<fmt/format.h>)
+    #include <fmt/format.h>
+
+/*
+ * Macro to allow for use of faster fmt library if on machine for string formatting
+ *
+ * - 1 to adhere to snprintf conventions
+ *
+*/
+    #define IGG_SNPRINTF(RETURN_LEN, DST, BUF_SIZE, FMT_LITERAL, SN_LITERAL, ...) do { \
+         fmt::format_to_n_result<char*> _RES = fmt::format_to_n((DST), (BUF_SIZE - 1), \
+         (fmt::runtime(FMT_LITERAL)), __VA_ARGS__);                                    \
+         (DST)[_RES.size] = '\0';                                                      \
+         (RETURN_LEN) = (int)_RES.size;                                                \
+    } while (0)
+
+#else
+    #error "FMT not found on machine; using standard string formatting"
+
+    #define IGG_SNPRINTF(RETURN_LEN, DST, BUF_SIZE, FMT_LITERAL, SN_LITERAL, ...) do { \
+          (RETURN_LEN) = snprintf((DST), (BUF_SIZE), (SN_LITERAL), __VA_ARGS__);       \
+    } while (0)
+
+#endif
 
 typedef enum {
     BRANCH,

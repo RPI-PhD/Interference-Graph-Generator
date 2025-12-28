@@ -5,7 +5,8 @@
 #
 
 CXX = g++
-override CXXFLAGS := -std=c++17 -Wall -Werror -Wextra -fsanitize=address -pedantic -g $(CXXFLAGS)
+override CXXFLAGS := -std=c++17 -Wall -Wextra -fsanitize=address -pedantic -Ofast -g -Iexternal/unordered_dense/include $(CXXFLAGS)
+LDLIBS += $(if $(wildcard /usr/lib*/libfmt.*),-lfmt,)
 
 #INP_DIR = data/DATASETv2
 FLAGS = -rc
