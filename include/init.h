@@ -2,9 +2,6 @@
 #define INTERFERENCE_GRAPH_GENERATOR_INIT_H
 
 #include "helper_structs.h"
-#include <fmt/core.h>
-
-
 
 #if defined(__has_include) && __has_include(<fmt/format.h>)
     #include <fmt/format.h>
