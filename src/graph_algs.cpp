@@ -1,7 +1,3 @@
-//
-// Created by haven on 12/23/25.
-//
-
 #include "../include/graph_algs.h"
 #include "../include/io_ops.h"
 #include "../include/aligned_realloc.h"
