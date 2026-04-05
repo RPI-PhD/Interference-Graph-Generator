@@ -1,7 +1,3 @@
-//
-// Created by haven on 12/23/25.
-//
-
 #include "../include/state_machine.h"
 
 const char * phi_machine(const char *p, long &len)
