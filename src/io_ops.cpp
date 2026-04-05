@@ -1,7 +1,3 @@
-//
-// Created by haven on 12/23/25.
-//
-
 #include "../include/io_ops.h"
 
 void parse_args(Flags* flags, const char *arg)
