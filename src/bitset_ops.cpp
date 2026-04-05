@@ -1,7 +1,3 @@
-//
-// Created by haven on 12/23/25.
-//
-
 #include "../include/bitset_ops.h"
 
 /*
